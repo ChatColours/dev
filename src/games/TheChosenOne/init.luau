@@ -1,6 +1,6 @@
 local baseUrl = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne"
 local function Execute(link : string, Window, WindUI, TabName)
-    local success, result = pcall(function()
+    local success, result = pcall(function() 
         loadstring(game:HttpGet(link))()
     end)
 
