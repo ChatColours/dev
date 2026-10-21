@@ -3,9 +3,9 @@ local baseUrl = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/ma
 local function Execute(link, Window, WindUI, TabName)
     local Start = tick()
     local success, result = pcall(function()
-        return loadstring(game:HttpGet(link))
+        return loadstring(game:HttpGet(link))()
     end)
-    warn(success, result)
+    
     if success then
         local module_success, module_err = pcall(function()
             result(Window, WindUI)
