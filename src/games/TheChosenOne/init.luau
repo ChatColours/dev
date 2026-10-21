@@ -5,7 +5,7 @@ local function Execute(link, Window, WindUI, TabName)
     local success, result = pcall(function()
         return loadstring(game:HttpGet(link))
     end)
-
+    warn(success, result)
     if success then
         local module_success, module_err = pcall(function()
             result(Window, WindUI)
