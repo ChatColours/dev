@@ -1,5 +1,5 @@
 local baseUrl = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne"
-
+print("v1")
 local function Execute(link, Window, WindUI, TabName)
     local Start = tick()
     local success, result = pcall(function()
