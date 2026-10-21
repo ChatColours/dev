@@ -1,12 +1,13 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
-const Services = {
+local Services = {
     RunService = game:GetService("RunService"),
     HttpService = game:GetService("HttpService")
 }
 local Hooks = {}
 local NecessaryFiles = {
     "fold.Herobrine",
+    "fold.Herobrine/assets",
     "file.Herobrine/test.txt"
 }
 
@@ -103,7 +104,7 @@ local Window = WindUI:CreateWindow({
     },
 })
 
-local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne"))()
+local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne/init.luau"))()
 init(Window, WindUI, "test")
 local ReadMe = Window:Tab({
     Title = "Read Me",
