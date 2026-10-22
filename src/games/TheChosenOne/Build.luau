@@ -42,7 +42,7 @@ return function(Window, WindUI)
                 local delTool = Player.Backpack:FindFirstChild("Delete") or Player.Character:FindFirstChild("Delete")
                 if delTool then
                     for i, v in ipairs(blocksInRange) do
-                        delTool.Event:FireServer(v, Player.Character.HumanoidRootPart.Position)
+                        delTool.Script.Event:FireServer(v, Player.Character.HumanoidRootPart.Position)
                     end
                 end
             end)
@@ -64,7 +64,7 @@ return function(Window, WindUI)
                 local Paint = Player.Backpack:FindFirstChild("Paint") or Player.Character:FindFirstChild("Paint")
                 if Paint then
                     for i, v in ipairs(blocksInRange) do
-                        Paint.Event:FireServer(
+                        Paint.Script.Event:FireServer(
                             v,
                             Enum.NormalId.Front,
                             Player.Character.HumanoidRootPart.Position,
