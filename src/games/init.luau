@@ -37,7 +37,7 @@ local function ListScripts(target)
         end
 
         local relativePath = file.path:sub(#prefix + 1)
-        
+
         if relativePath:match("%.luau?$") then
             local name = relativePath:match("([^/]+)%.luau?$")
 
@@ -47,6 +47,7 @@ local function ListScripts(target)
                     Path = relativePath,
                     URL = baseUrl .. relativePath
                 })
+                 print("REACHED END -> GOT SCRIPTS")
             end
         end
     end

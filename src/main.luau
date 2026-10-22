@@ -103,6 +103,12 @@ local Window = WindUI:CreateWindow({
     },
 })
 
+-- Load supported game tabs
+local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
+init(Window, WindUI, {
+    "TheChosenOne"
+})
+
 local ReadMe = Window:Tab({
     Title = "Read Me",
     Icon = "file-text", -- optional
@@ -129,9 +135,3 @@ ReadMe:Paragraph({
 })
 
 Window:Divider()
-
--- Load supported game tabs
-local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
-init(Window, WindUI, {
-    "TheChosenOne"
-})
