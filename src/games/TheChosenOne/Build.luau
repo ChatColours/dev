@@ -16,6 +16,19 @@ local function GetBlocksInRange()
     end
 end
 
+local function getPositionAround(part, minRange, maxRange)
+	local distance = math.random() * (maxRange - minRange) + minRange
+
+	local theta = math.random() * math.pi * 2
+	local phi = math.acos(2 * math.random() - 1) 
+
+	local x = distance * math.sin(phi) * math.cos(theta)
+	local y = distance * math.cos(phi)
+	local z = distance * math.sin(phi) * math.sin(theta)
+
+	return part.Position + Vector3.new(x, y, z)
+end
+
 local Materials = {"smooth", "plastic", "tiles", "planks", "ice", "grass", "sand", "snow", "glass",
                    "wood", "stone", "pebble", "marble", "granite", "steel", "metal", "asphalt",
                    "concrete", "pavement", "anchor", "collide", "neon", "toxic"}
@@ -78,6 +91,26 @@ return function(Window, WindUI)
             end)
         else
             Connections["PaintAura"]:Disconnect()
+        end
+    end
+})
+
+    Tab:Toggle({
+    Title = "Build Aura",
+    Desc = "build cubes in range",
+    Icon = "bird",
+    Type = "Checkbox",
+    Value = false, -- default value
+    Callback = function(state) 
+        if state then
+            Connections["BuildAura"] = RunService.RenderStepped:Connect(function()
+                local Build = Player.Backpack:FindFirstChild("Build") or Player.Character:FindFirstChild("Build")
+                if Build then
+                    Build.Script.Event:FireServer(workspace.Terrain, Enum.NormalId.Top, getPositionAround(Player.Character.HumanoidRootPart, 5, 20), "normal")
+                end
+            end)
+        else
+            Connections["BuildAura"]:Disconnect()
         end
     end
 })
