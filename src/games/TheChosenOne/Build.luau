@@ -21,7 +21,7 @@ return function(Window, WindUI)
 
     local Tab = Window:Tab({
     Title = "Grief",
-    Icon = "bomb", -- optional
+   -- Icon = "bomb", -- optional
     Locked = false,
     })
     
@@ -37,7 +37,7 @@ return function(Window, WindUI)
                 local delTool = Player.Backpack:FindFirstChild("Delete") or Player.Character:FindFirstChild("Delete")
                 if delTool then
                     for i, v in ipairs(blocksInRange) do
-                        delTool:FireServer(v, Player.Character.HumanoidRootPart.Position)
+                        delTool.Event:FireServer(v, Player.Character.HumanoidRootPart.Position)
                     end
                 end
             end)
