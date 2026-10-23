@@ -12,11 +12,19 @@ function loader.Require(path)
     print("Loading: ".. baseurl.. path)
     local url = baseurl.. path
     local source = game:HttpGet(url)
-    local module = loadstring(source)()
 
-    cache[path] = module
+    local success, result = pcall(function()
+        return loadstring(source)()
+    end)
+    
+    if not success then
+        warn(`Failed to load {url} -> {result}`)
+        return nil
+    end
+
+    cache[path] = result
      print(`Loaded {path} in {tostring(tick() - a)}`)
-    return module
+    return result
 end
 
 return loader
