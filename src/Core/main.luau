@@ -12,7 +12,7 @@ const Services = {
 local Hooks = {}
 
 local SupportedGames = {
-    [11137575513] = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne"
+    [0] = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne"
 }
 
 local function SafeRead(path : string)
@@ -81,9 +81,20 @@ Window:Tag({
     Title = Version:sub(1, 7),
     Icon = "github",
     Color = Color3.fromHex("#30ff6a"),
-    Radius = 0, -- from 0 to 13
+    Radius = 13, -- from 0 to 13
 })
-
+Window:Tag({
+    Title = (SupportedGames[game.PlaceId] and "Supported Game") or "Unsupported Game",
+    Icon = "gamepad-2",
+    Color = (SupportedGames[game.PlaceId] and Color3.fromHex("#30ff6a")) or Color3.fromHex("#ff3030"),
+    Radius = 13, -- from 0 to 13
+})
+Window:Tag({
+    Title = "discord.gg/abcdefg",
+    Icon = FetchAsset("discord.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/discord.png"),
+    Color = Color3.fromHex("#30ff6a"),
+    Radius = 13, -- from 0 to 13
+})
 WindUI:AddTheme({
     Name = "Minecraft",
 
@@ -173,9 +184,52 @@ for i, v in pairs(ExeFunctions) do
 end
 
 ReadMe:Paragraph({
-    Title = "Supported Functions",
-    Desc = supportedFunctionstxt,
-    Color = "Grey",
+    Title = "Information",
+    Desc = 
+[[
+<font size="22" color="#D9B78C"><b>Welcome to SteveHub!</b></font>
+
+<font color="#E0D5C5">SteveHub</font> is a free, open-source Roblox script hub designed to provide both <b>universal utilities</b> and <b>game-specific features</b> in one convenient interface.
+
+Our goal is to create a powerful, lightweight, and modular experience that is easy to use, regularly improved, and accessible to everyone.
+
+<font size="17" color="#C6A47D"><b>What We Offer</b></font>
+<font color="#CFC5B8">• Universal features across supported experiences
+• Dedicated scripts for individual games
+• Anti-cheat bypasses
+• A clean and customisable interface
+• Modular systems for improved maintainability
+• Regular improvements and new functionality
+• Free and open-source development</font>
+
+<font size="17" color="#C6A47D"><b>Supported Games</b></font>
+<font color="#A6C48A">✓</font> The Chosen One
+<font color="#A6C48A">✓</font> Patrol Compton
+
+<font color="#A99B8A"><i>More experiences and features are planned for future updates.</i></font>
+
+<font size="17" color="#C6A47D"><b>Executor Compatibility</b></font>
+SteveHub supports various executors, although certain advanced functions and bypasses require higher-level executors such as <font color="#D9B78C"><b>Volt</b></font>.
+
+Some features may be unavailable depending on your executor's supported functions.
+
+<font size="17" color="#C6A47D"><b>Open-Source Development</b></font>
+SteveHub is built with modularity and transparency in mind. Our publicly available code and assets may be studied, modified, and reused.
+
+Contributions, suggestions, and bug reports are always appreciated as we continue improving the project.
+
+<font size="17" color="#C6A47D"><b>Important Information</b></font>
+<font color="#CFC5B8">• Features may change or become unavailable after game updates.
+• Some functions are experimental and may contain bugs.
+• Use SteveHub responsibly and at your own discretion.</font>
+
+<font color="#A99B8A"><i>Built for versatility. Designed for simplicity.</i></font>
+
+<font color="#D9B78C"><b>SteveHub</b></font>
+<font color="#A99B8A"><i>Created and maintained by ChatColours.</i></font>
+]]
+,
+    Color = Color3.fromHex("#3B3027"),
     Image = "",
     ImageSize = 30,
     Thumbnail = "",
@@ -185,24 +239,10 @@ ReadMe:Paragraph({
     }
 })
 
-
 ReadMe:Paragraph({
-    Title = "Information",
-    Desc = [[Welcome to SteveHub,
-<i>SteveHub is a script, designed to be universal and support games at the same time.</i>
-SteveHub is an open-source modular script, our assets may be used freely.
-
-Bypasses require high level executors like Volt.
-
-Supported games:
-    • The Chosen One
-    • Patrol Compton
-
-- More to come
-
-  <i>By ChatColours</i>
-    ]],
-    Color = "Brown",
+    Title = "Supported Functions",
+    Desc = supportedFunctionstxt,
+    Color = Color3.fromHex("#3B3027"),
     Image = "",
     ImageSize = 30,
     Thumbnail = "",
