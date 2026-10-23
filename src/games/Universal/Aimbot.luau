@@ -120,35 +120,41 @@ return function(Window, WindUI)
         end
     end)
 
-    RunService.RenderStepped:Connect(function()
-        Camera = workspace.CurrentCamera
+    local previousCameraType = nil
 
-        if not Camera then
-            return
-        end
+    RunService:BindToRenderStep(
+        "SteveHubAimbot",
+        Enum.RenderPriority.Camera.Value + 1,
+        function()
+            Camera = workspace.CurrentCamera
+            if not Camera then return end
 
-        circle.Position = GetCenter()
-        circle.Radius = radius
+            circle.Position = GetCenter()
+            circle.Radius = radius
 
-        if not enabled then
-            return
-        end
-
-        local aiming = UserInputService:IsMouseButtonPressed(
-            Enum.UserInputType.MouseButton2
-        )
-
-        if not aiming then
-            return
-        end
-
-        local target = GetClosest()
-
-        if target then
-            Camera.CFrame = CFrame.lookAt(
-                Camera.CFrame.Position,
-                target.Position
+            local aiming = enabled and UserInputService:IsMouseButtonPressed(
+                Enum.UserInputType.MouseButton2
             )
+
+            if aiming then
+                if not previousCameraType then
+                    previousCameraType = Camera.CameraType
+                end
+
+                Camera.CameraType = Enum.CameraType.Scriptable
+
+                local target = GetClosest()
+
+                if target then
+                    Camera.CFrame = CFrame.lookAt(
+                        Camera.CFrame.Position,
+                        target.Position
+                    )
+                end
+            elseif previousCameraType then
+                Camera.CameraType = previousCameraType
+                previousCameraType = nil
+            end
         end
-    end)
+    )
 end
