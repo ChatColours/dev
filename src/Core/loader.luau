@@ -9,7 +9,7 @@ function loader.Require(path)
         print(`Loaded {path} in {tostring(tick() - a)} (CACHED)`)
         return cache[path]
     end
-
+    print("Loading: ".. baseurl.. path)
     local url = baseurl.. path
     local source = game:HttpGet(url)
     local module = loadstring(source)()
