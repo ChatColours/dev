@@ -8,6 +8,8 @@ local Camera = workspace.CurrentCamera
 local toggleKey = Enum.KeyCode.G
 local enabled = false
 local radius = 120
+local wallCheck = true
+local teamCheck = true
 
 local circle = Drawing.new("Circle")
 circle.Visible = false
@@ -22,6 +24,22 @@ local function GetCenter()
     return Vector2.new(viewport.X / 2, viewport.Y / 2)
 end
 
+local function IsVisible(character, targetPart)
+    local origin = Camera.CFrame.Position
+    local direction = targetPart.Position - origin
+
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = {
+        Player.Character
+    }
+    params.IgnoreWater = true
+
+    local result = workspace:Raycast(origin, direction, params)
+
+    return result == nil or result.Instance:IsDescendantOf(character)
+end
+
 local function GetClosest()
     local closest = nil
     local shortest = math.huge
@@ -29,6 +47,10 @@ local function GetClosest()
 
     for _, player in Players:GetPlayers() do
         if player == Player then
+            continue
+        end
+
+        if teamCheck and player.Team ~= nil and player.Team == Player.Team then
             continue
         end
 
@@ -53,10 +75,16 @@ local function GetClosest()
         local position = Vector2.new(screenPos.X, screenPos.Y)
         local distance = (position - center).Magnitude
 
-        if distance <= radius and distance < shortest then
-            shortest = distance
-            closest = head
+        if distance > radius or distance >= shortest then
+            continue
         end
+
+        if wallCheck and not IsVisible(character, head) then
+            continue
+        end
+
+        shortest = distance
+        closest = head
     end
 
     return closest
@@ -97,6 +125,27 @@ return function(Window, WindUI)
         end
     })
 
+    Tab:Toggle({
+        Title = "Team Check",
+        Desc = "Exclude players on the same team as you",
+        Icon = "bird",
+        Type = "Checkbox",
+        Value = false, -- default value
+        Callback = function(state) 
+            teamCheck = state
+        end
+    })
+    Tab:Toggle({
+        Title = "Wall Check",
+        Desc = "Don't aim at users behind walls",
+        Icon = "bird",
+        Type = "Checkbox",
+        Value = false, -- default value
+        Callback = function(state) 
+            wallCheck = state
+        end
+    })
+
     Tab:Colorpicker({
         Title = "FOV Color",
         Desc = "The color of the circle",
@@ -108,6 +157,8 @@ return function(Window, WindUI)
             circle.Color = color
         end
     })
+
+
 
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then
