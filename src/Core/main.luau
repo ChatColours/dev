@@ -271,6 +271,7 @@ Window:Divider()
 local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
 init(Window, WindUI, "Universal/Home.luau")
 init(Window, WindUI, "Universal/Aimbot.luau")
+init(Window, WindUI, "Universal/Visuals.luau")
 init(Window, WindUI, "Universal/Scripts.luau")
 --[[ Load supported game tabs
 local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
