@@ -18,7 +18,7 @@ return function(Window, WindUI)
     local upTime = Tab:Paragraph({
     Title = "Uptime",
     Desc = FormatTime(uptime),
-    Color = "Red",
+    Color = Color3.fromHex("#3B3027"),
     Image = "",
     ImageSize = 30,
     Thumbnail = "",
