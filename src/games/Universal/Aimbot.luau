@@ -22,7 +22,7 @@ local function getClosest()
         if v ~= plr and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
             local head = v.Character:FindFirstChild("Head")
             if head then
-                local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
+                local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(head.Position)
                 if onScreen then
                     local distFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - circle.Position).Magnitude
                     
