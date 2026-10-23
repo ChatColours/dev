@@ -89,12 +89,26 @@ Window:Tag({
     Color = (SupportedGames[game.PlaceId] and Color3.fromHex("#30ff6a")) or Color3.fromHex("#ff3030"),
     Radius = 13, -- from 0 to 13
 })
-Window:Tag({
-    Title = "discord.gg/abcdefg",
+
+WindUI:Popup({
+    Title = "Join Discord?",
     Icon = FetchAsset("discord.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/discord.png"),
-    Color = Color3.fromHex("#30ff6a"),
-    Radius = 13, -- from 0 to 13
+    Content = "Join the Discord to chat and receive updates",
+    Buttons = {
+        {
+            Title = "Don't Join",
+            Callback = function() end,
+            Variant = "Tertiary",
+        },
+        {
+            Title = "Join Discord",
+            Icon = "arrow-right",
+            Callback = function() setclipboard("discord.gg/abcdef") end,
+            Variant = "Primary",
+        }
+    }
 })
+
 WindUI:AddTheme({
     Name = "Minecraft",
 
@@ -254,19 +268,10 @@ ReadMe:Paragraph({
 
 Window:Divider()
 
-local Home = Window:Tab({
-    Title = "Home",
-    Icon = "house", -- optional
-    Locked = false,
-})
-
-local Server = Window:Tab({
-    Title = "Servers",
-    Icon = "server", -- optional
-    Locked = false,
-})
-
-
+local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
+init(Window, WindUI, "Universal/Home.luau")
+init(Window, WindUI, "Universal/Aimbot.luau")
+init(Window, WindUI, "Universal/Scripts.luau")
 --[[ Load supported game tabs
 local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
 init(Window, WindUI, "PatrolCompton/cars.luau")]]
