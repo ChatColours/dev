@@ -12,7 +12,18 @@ const Services = {
 local Hooks = {}
 
 local SupportedGames = {
-    [11137575513] = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne"
+    [11137575513] = {
+        BaseURL = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne",
+        Tabs = {
+            "Build.luau"
+        }
+    }, -- TCO
+    [86799185313399] = {
+        Folder = "PatrolCompton",
+        Tabs = {
+            "/cars.luau"
+        }
+    } -- Patrol Compton
 }
 
 local function SafeRead(path : string)
@@ -273,6 +284,9 @@ init(Window, WindUI, "Universal/Home.luau")
 init(Window, WindUI, "Universal/Aimbot.luau")
 init(Window, WindUI, "Universal/Visuals.luau")
 init(Window, WindUI, "Universal/Scripts.luau")
---[[ Load supported game tabs
-local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
-init(Window, WindUI, "PatrolCompton/cars.luau")]]
+
+if SupportedGames[game.PlaceId] then
+    for i, v in ipairs(SupportedGames[game.PlaceId].Tabs) do
+        init(Window, WindUI, SupportedGames[game.PlaceId].BaseURL.. v)
+    end
+end

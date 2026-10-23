@@ -375,6 +375,37 @@ return function(Window, WindUI)
         Icon = "eye",
         Locked = false,
     })
+    local fov = workspace.CurrentCamera.FieldOfView
+    local fovEnabled = false
+
+    Tab:Toggle({
+    Title = "Custom FOV",
+    Desc = "Change your FOV",
+    Icon = "bird",
+    Type = "Checkbox",
+    Value = false, -- default value
+    Callback = function(state) 
+        fovEnabled = state
+    end
+})
+
+    local Slider = Tab:Slider({
+    Title = "FOV Amount",
+    Desc = "",
+    
+    -- To make float number supported, 
+    -- make the Step a float number.
+    -- example: Step = 0.1
+    Step = 1,
+    Value = {
+        Min = 1,
+        Max = 170,
+        Default = 70,
+    },
+    Callback = function(value)
+        fov = value
+    end
+})
 
     Tab:Section({
         Title = "Player ESP",
@@ -434,6 +465,9 @@ return function(Window, WindUI)
         if not Camera then
             return
         end
+        if fovEnabled then
+            Camera.FieldOfView = fov
+        end
 
         local color = GetESPColor()
 
@@ -441,4 +475,5 @@ return function(Window, WindUI)
             UpdateESP(player, objects, color)
         end
     end)
+
 end
