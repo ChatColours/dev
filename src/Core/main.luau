@@ -12,7 +12,7 @@ const Services = {
 local Hooks = {}
 
 local SupportedGames = {
-    [0] = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne"
+    [11137575513] = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne"
 }
 
 local function SafeRead(path : string)
