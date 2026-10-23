@@ -7,9 +7,11 @@ local Camera = workspace.CurrentCamera
 
 local toggleKey = Enum.KeyCode.G
 local enabled = false
+
 local radius = 120
 local wallCheck = true
 local teamCheck = true
+local lead = 0
 
 local circle = Drawing.new("Circle")
 circle.Visible = false
@@ -22,6 +24,10 @@ circle.Color = Color3.new(1, 1, 1)
 local function GetCenter()
     local viewport = Camera.ViewportSize
     return Vector2.new(viewport.X / 2, viewport.Y / 2)
+end
+
+local function GetPredictedPosition(target)
+    return target.Position + target.AssemblyLinearVelocity * lead
 end
 
 local function IsVisible(character, targetPart)
@@ -91,7 +97,6 @@ local function GetClosest()
 end
 
 return function(Window, WindUI)
-
     local Tab = Window:Tab({
         Title = "Aimbot",
         Icon = "crosshair",
@@ -125,23 +130,42 @@ return function(Window, WindUI)
         end
     })
 
+    Tab:Slider({
+        Title = "Movement Prediction",
+        Desc = "Compensate for target movement",
+        Step = 0.01,
+
+        Value = {
+            Min = 0,
+            Max = 0.5,
+            Default = 0,
+        },
+
+        Callback = function(value)
+            lead = value
+        end
+    })
+
     Tab:Toggle({
         Title = "Team Check",
         Desc = "Exclude players on the same team as you",
-        Icon = "bird",
+        Icon = "users",
         Type = "Checkbox",
-        Value = false, -- default value
-        Callback = function(state) 
+        Value = teamCheck,
+
+        Callback = function(state)
             teamCheck = state
         end
     })
+
     Tab:Toggle({
         Title = "Wall Check",
-        Desc = "Don't aim at users behind walls",
-        Icon = "bird",
+        Desc = "Don't aim at players behind walls",
+        Icon = "shield",
         Type = "Checkbox",
-        Value = false, -- default value
-        Callback = function(state) 
+        Value = wallCheck,
+
+        Callback = function(state)
             wallCheck = state
         end
     })
@@ -158,8 +182,6 @@ return function(Window, WindUI)
         end
     })
 
-
-
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then
             return
@@ -171,14 +193,14 @@ return function(Window, WindUI)
         end
     end)
 
-    local AIMBOT_BIND = "SteveHubAimbot"
-
     RunService:BindToRenderStep(
-        AIMBOT_BIND,
+        "SteveHubAimbot",
         Enum.RenderPriority.Camera.Value + 1,
         function()
             local camera = workspace.CurrentCamera
-            if not camera then return end
+            if not camera then
+                return
+            end
 
             Camera = camera
 
@@ -200,12 +222,12 @@ return function(Window, WindUI)
                 return
             end
 
+            local predictedPosition = GetPredictedPosition(target)
+
             camera.CFrame = CFrame.lookAt(
                 camera.CFrame.Position,
-                target.Position
+                predictedPosition
             )
-
-            camera.Focus = CFrame.new(target.Position)
         end
     )
 end
