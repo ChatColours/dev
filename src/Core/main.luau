@@ -1,8 +1,9 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-local Loader = require(loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))())
+local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
 
-local FetchAsset = Loader.Require("Utilities/files.luau")
+local FetchAsset = Loader.Require("src/Core/Utilities/files.luau")
 local ServerSearch = Loader.Require("src/Modules/ServerSearch.luau")
+local Version = Loader.Require("src/Core/Utilities/version.luau")
 
 const Services = {
     RunService = game:GetService("RunService"),
@@ -49,10 +50,10 @@ end
 -- main window --
 
 local Window = WindUI:CreateWindow({
-    Title = "My Super Hub",
+    Title = "Steve Hub",
     Icon = FetchAsset("icon.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/icon.jpg"), -- lucide icon
-    Author = "by .ftgs and .ftgs",
-    Folder = "Herobrine",
+    Author = "By ChatColours",
+    Folder = "Steve",
     
     -- ↓ This all is Optional. You can remove it.
     Size = UDim2.fromOffset(580, 460),
@@ -60,7 +61,7 @@ local Window = WindUI:CreateWindow({
     MaxSize = Vector2.new(850, 560),
     ToggleKey = Enum.KeyCode.RightShift,
     Transparent = true,
-    Background = getcustomasset("bg.png"),
+    Background = FetchAsset("background.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/background.png"),
     Theme = "Dark",
     Resizable = true,
     SideBarWidth = 200,
@@ -75,6 +76,12 @@ local Window = WindUI:CreateWindow({
             print("clicked")
         end,
     },
+})
+Window:Tag({
+    Title = Version:sub(1, 7),
+    Icon = "github",
+    Color = Color3.fromHex("#30ff6a"),
+    Radius = 0, -- from 0 to 13
 })
 
 WindUI:AddTheme({

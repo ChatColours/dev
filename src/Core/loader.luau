@@ -11,10 +11,9 @@ function loader.Require(path)
     end
     print("Loading: ".. baseurl.. path)
     local url = baseurl.. path
-    local source = game:HttpGet(url)
 
     local success, result = pcall(function()
-        return loadstring(source)()
+        return loadstring(game:HttpGet(url))()
     end)
     
     if not success then
