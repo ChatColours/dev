@@ -2,7 +2,7 @@ local CarConfig = require(game:GetService("ReplicatedStorage").Shared.Config.Veh
 local function SetData(expected, val)
     for team, _ in pairs(CarConfig.Handling) do
         for i, v in pairs(team) do
-             if i == expected then i = val end
+             if i == expected then v = val end
         end
     end
 end
