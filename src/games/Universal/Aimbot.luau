@@ -79,7 +79,7 @@ Tab:Slider({
         Default = 40,
     },
     Callback = function(value)
-        radius = value * 3
+        circle.Radius = value * 3
     end
 })
 
