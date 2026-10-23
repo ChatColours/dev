@@ -9,19 +9,18 @@ end
 
 return function(Window, WindUI)
     local Handling = CarConfig.Handling
-    local ResetVals = CarConfig
     local Tab = Window:Tab({
     Title = "Car Mods",
-    Icon = "bird", -- optional
+    Icon = "car", -- optional
     Locked = false,
 })
 
-local Button = Tab:Button({
+Tab:Button({
     Title = "Reset",
     Desc = "Test Button",
     Locked = false,
     Callback = function()
-        -- ...
+       CarConfig.Handling = Handling
     end
 })
     Tab:Slider({
