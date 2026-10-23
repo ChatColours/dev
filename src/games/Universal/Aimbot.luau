@@ -137,7 +137,7 @@ return function(Window, WindUI)
 
         Value = {
             Min = 0,
-            Max = 0.5,
+            Max = 1,
             Default = 0,
         },
 
