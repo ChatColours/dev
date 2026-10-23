@@ -16,7 +16,7 @@ for _, v in NecessaryFiles do
     end
 end
 
-return function FetchAsset(FileName, Link)
+return function(FileName, Link)
     if isfile("Steve/assets/".. FileName) then
         return getcustomasset("Steve/assets/".. FileName)
     else
