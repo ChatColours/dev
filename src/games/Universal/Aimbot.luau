@@ -171,41 +171,41 @@ return function(Window, WindUI)
         end
     end)
 
-    local previousCameraType = nil
+    local AIMBOT_BIND = "SteveHubAimbot"
 
     RunService:BindToRenderStep(
-        "SteveHubAimbot",
+        AIMBOT_BIND,
         Enum.RenderPriority.Camera.Value + 1,
         function()
-            Camera = workspace.CurrentCamera
-            if not Camera then return end
+            local camera = workspace.CurrentCamera
+            if not camera then return end
+
+            Camera = camera
 
             circle.Position = GetCenter()
             circle.Radius = radius
 
-            local aiming = enabled and UserInputService:IsMouseButtonPressed(
+            if not enabled then
+                return
+            end
+
+            if not UserInputService:IsMouseButtonPressed(
                 Enum.UserInputType.MouseButton2
+            ) then
+                return
+            end
+
+            local target = GetClosest()
+            if not target then
+                return
+            end
+
+            camera.CFrame = CFrame.lookAt(
+                camera.CFrame.Position,
+                target.Position
             )
 
-            if aiming then
-                if not previousCameraType then
-                    previousCameraType = Camera.CameraType
-                end
-
-                Camera.CameraType = Enum.CameraType.Scriptable
-
-                local target = GetClosest()
-
-                if target then
-                    Camera.CFrame = CFrame.lookAt(
-                        Camera.CFrame.Position,
-                        target.Position
-                    )
-                end
-            elseif previousCameraType then
-                Camera.CameraType = previousCameraType
-                previousCameraType = nil
-            end
+            camera.Focus = CFrame.new(target.Position)
         end
     )
 end
