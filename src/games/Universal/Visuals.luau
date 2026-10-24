@@ -49,7 +49,6 @@ local R15Bones = {
 
 local function NewDrawing(class, properties)
     local object = Drawing.new(class)
-    object.ZIndex = 0
     for property, value in properties do
         object[property] = value
     end
