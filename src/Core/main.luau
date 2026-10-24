@@ -283,6 +283,7 @@ local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColo
 init(Window, WindUI, "Universal/Home.luau")
 init(Window, WindUI, "Universal/Aimbot.luau")
 init(Window, WindUI, "Universal/Visuals.luau")
+init(Window, WindUI, "Universal/Bypasses.luau")
 init(Window, WindUI, "Universal/Scripts.luau")
 
 if SupportedGames[game.PlaceId] then

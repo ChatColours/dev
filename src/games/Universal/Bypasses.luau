@@ -6,11 +6,10 @@ local hooks = {
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local humanoid = char and char:WaitForChild("Humanoid")
-player.CharacterAdded:Connect(function(c)
-    char = c
-    humanoid = char:WaitForChild("Humanoid")
+local HumanoidHook
 
-    hookmetamethod(humanoid, "__index", newcclosure(function(self, key)
+local function hookHumanoid()
+    HumanoidHook = hookmetamethod(humanoid, "__index", newcclosure(function(self, key)
         if typeof(self) == "Instance" and self:IsA("Humanoid") and hooks["HumanoidClient"] and hooks["HumanoidClient"] == true then
             if key == "WalkSpeed" then
                 return 16
@@ -20,8 +19,19 @@ player.CharacterAdded:Connect(function(c)
                 return 7.2
             end
         end
+
+        return HumanoidHook(self, key)
     end))
+end
+
+player.CharacterAdded:Connect(function(c)
+    char = c
+    humanoid = char:WaitForChild("Humanoid")
+
+    hookHumanoid()
 end)
+
+hookHumanoid()
 
 return function(Window, WindUI)
     local Tab = Window:Tab({
@@ -32,19 +42,46 @@ return function(Window, WindUI)
 
     Tab:Paragraph({
         Title = "Information",
-        Desc = "Test Paragraph",
-        Color = "Red",
+    Desc = [[
+<font size="22" color="#D9B78C"><b>Executor Hooks &amp; Compatibility</b></font>
+
+<font color="#E0D5C5">SteveHub</font> provides various hooking features designed to work with supported executor functions.
+
+<font color="#A99B8A"><i>Features that are not supported by your current executor will automatically be locked or unavailable.</i></font>
+
+<font size="17" color="#C6A47D"><b>Hooking Methods</b></font>
+
+<font color="#D9B78C"><b>Hookfunction</b></font>
+<font color="#CFC5B8">A traditional hooking method that replaces or redirects function calls. Depending on the implementation, hooked callbacks may expose information about their execution environment.</font>
+
+<font color="#D9B78C"><b>OTH Hooks</b></font>
+<font color="#CFC5B8">An alternative hooking method that may use separate execution threads or environments, depending on the executor's implementation.</font>
+
+<font size="17" color="#C6A47D"><b>Key Differences</b></font>
+<font color="#CFC5B8">• <b>Hookfunction:</b> Traditional function interception.
+• <b>OTH:</b> Alternative thread-based hooking mechanisms.
+• <b>Compatibility:</b> Availability varies between executors.
+• <b>Detection:</b> Neither method guarantees undetectability.</font>
+
+<font size="17" color="#C6A47D"><b>Important Information</b></font>
+<font color="#A6C48A">✓</font> Unsupported features will be locked automatically.
+<font color="#A6C48A">✓</font> Available methods depend on executor capabilities.
+<font color="#D9B78C">!</font> Hooking behaviour may vary across executors.
+<font color="#D9B78C">!</font> Some methods may introduce compatibility or stability issues.
+
+<font color="#A99B8A"><i>Select the hooking method best suited to your executor and its supported functionality.</i></font>
+
+<font color="#D9B78C"><b>SteveHub</b></font>
+<font color="#A99B8A"><i>Developed by ChatColours.</i></font>
+]],
+        Color = Color3.fromHex("#3B3027"),
         Image = "",
         ImageSize = 30,
         Thumbnail = "",
         ThumbnailSize = 80,
         Locked = false,
         Buttons = {
-            {
-                Icon = "bird",
-                Title = "Button",
-                Callback = function() print("1 Button") end,
-            }
+
         }
     })
 
@@ -97,7 +134,7 @@ return function(Window, WindUI)
         end
     })
 
-    local Toggle = Tab:Toggle({
+    Tab:Toggle({
         Title = "Anti-Kick",
         Desc = "Only works if a localscript tries to kick you",
         Icon = "bird",
@@ -115,12 +152,17 @@ return function(Window, WindUI)
                         local method = getnamecallmethod()
 
                         if method == "Kick" then
-                            return -- Block kick
+                            return
                         end
 
                         return hooks["antikick2"](self, ...)
                     end)
                 )
+            else
+                hooks["antikick1"] = nil
+                hooks["antikick2"] = nil
+                restorefunction(game.Players.LocalPlayer.Kick)
+                restorefunction(getrawmetatable(game).__namecall)
             end
         end
     })
