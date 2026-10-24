@@ -16,6 +16,7 @@ local mouseKeys = {
     ["RMB"] = Enum.UserInputType.MouseButton2,
     ["MMB"] = Enum.UserInputType.MouseButton3
 }
+local teamExclusions = {}
 local triggerBotThread = nil
 local holdingLMB = false
 local triggerBot = false
@@ -81,7 +82,8 @@ local function GetTriggerTarget()
         and not targetPlayer.Neutral
         and not Player.Neutral
         and targetPlayer.Team ~= nil
-        and targetPlayer.Team == Player.Team then
+        and targetPlayer.Team == Player.Team
+        or teamExclusions[targetPlayer.Team.Name] then
         return nil
     end
 
@@ -223,6 +225,7 @@ return function(Window, WindUI)
         end
     })
 
+
     Tab:Slider({
         Title = "Mouse Aimbot Smoothing",
         Desc = "How smooth cursor movement should be",
@@ -271,10 +274,32 @@ return function(Window, WindUI)
             lead = value
         end
     })
+    local teams = game.Teams:GetChildren()
+    for i, v in ipairs(teams) do
+        v = v.Name
+    end
+    Tab:Dropdown({
+        Title = "Team Exclusions",
+        Desc = "What teams to ignore for aimbot",
+        Values = teams,
+        Value = {},
+        Multi = true,
+        AllowNone = true,
+        Callback = function(option) 
+            for i, v in ipairs(option) do
+                teamExclusions[v] = true
+            end
+            for i, v in pairs(teamExclusions) do
+                if not table.find(option, i) then
+                    teamExclusions[i] = nil
+                end
+            end
+        end
+    })
 
     Tab:Toggle({
         Title = "Team Check",
-        Desc = "Exclude players on the same team as you",
+        Desc = "Exclude players in teams that are excluded",
         Icon = "users",
         Type = "Checkbox",
         Value = teamCheck,
