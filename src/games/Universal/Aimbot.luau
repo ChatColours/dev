@@ -16,8 +16,9 @@ local mouseKeys = {
     ["RMB"] = Enum.UserInputType.MouseButton2,
     ["MMB"] = Enum.UserInputType.MouseButton3
 }
+local fastClickThread = nil
+local holdingLMB = false
 local fastClick = false
-local fastClickThread
 local radius = 120
 local wallCheck = true
 local teamCheck = true
@@ -41,6 +42,34 @@ local function GetCenter()
     return Vector2.new(viewport.X / 2, viewport.Y / 2)
 end
 
+local function StopFastClick()
+    holdingLMB = false
+
+    if fastClickThread then
+        task.cancel(fastClickThread)
+        fastClickThread = nil
+    end
+end
+
+local function StartFastClick()
+    if not fastClick or fastClickThread then
+        return
+    end
+
+    holdingLMB = true
+
+    fastClickThread = task.spawn(function()
+        while holdingLMB and fastClick do
+            if mouse1click then
+                mouse1click()
+            end
+
+            task.wait(0.05)
+        end
+
+        fastClickThread = nil
+    end)
+end
 
 local function GetAimCenter()
     if mouseaim then
@@ -164,6 +193,10 @@ return function(Window, WindUI)
         Value = false, -- default value
         Callback = function(state) 
             fastClick = state
+
+            if not state then
+                StopFastClick()
+            end
         end
     })
 
@@ -272,35 +305,24 @@ return function(Window, WindUI)
         if input.KeyCode == toggleKey then
             enabled = not enabled
             circle.Visible = enabled
+
         elseif input.KeyCode == mouseaimKey then
             mouseaim = true
             usemouseaim = true
         end
 
-        if fastClick then
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                if not fastClickThread then
-                    fastClickThread = task.spawn(function()
-                        while task.wait() do
-                            if mouse1click then mouse1click() end
-                        end
-                    end)
-                end
-            end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            StartFastClick()
         end
     end)
 
-    UserInputService.InputEnded:Connect(function(input, gp)
-        if gp then return end
-
+    UserInputService.InputEnded:Connect(function(input)
         if input.KeyCode == mouseaimKey then
-            --mouseaim = false
             usemouseaim = false
         end
 
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and not fastClick then
-            task.cancel(fastClickThread)
-            fastClickThread = nil
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            StopFastClick()
         end
     end)
 
