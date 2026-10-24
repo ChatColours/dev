@@ -117,31 +117,6 @@ local function GetClosest()
     return closest
 end
 
-local function AimWithMouse()
-    if not mousemoverel then return end
-
-    local cam = workspace.CurrentCamera
-    local screenPosition, onScreen = camera:WorldToViewportPoint(
-        GetPredictedPosition(target)
-    )
-
-    if not onScreen then
-        return
-    end
-
-    local mousePosition = UserInputService:GetMouseLocation()
-
-    local difference = Vector2.new(
-        screenPosition.X,
-        screenPosition.Y
-    ) - mousePosition
-
-    mousemoverel(
-        difference.X * smoothing,
-        difference.Y * smoothing
-    )
-end
-
 return function(Window, WindUI)
     local Tab = Window:Tab({
         Title = "Aimbot",
@@ -275,41 +250,55 @@ return function(Window, WindUI)
         end
     end)
 
-    RunService:BindToRenderStep(
-        "SteveHubAimbot",
-        Enum.RenderPriority.Camera.Value + 1,
-        function()
-            local camera = workspace.CurrentCamera
-            if not camera then
-                return
-            end
+RunService:BindToRenderStep(
+    "SteveHubAimbot",
+    Enum.RenderPriority.Camera.Value + 1,
+    function()
+        local camera = workspace.CurrentCamera
+        if not camera then return end
 
-            Camera = camera
+        Camera = camera
+        circle.Position = GetAimCenter()
+        circle.Radius = radius
 
-            circle.Position = mouseaim and UserInputService:GetMouseLocation() or GetCenter()
-            circle.Radius = radius
+        if not enabled then return end
 
-            if not enabled then
-                return
-            end
+        local holding = UserInputService:IsMouseButtonPressed(
+            Enum.UserInputType.MouseButton2
+        )
 
-            if not UserInputService:IsMouseButtonPressed(
-                holdKey
-            ) then
-                return
-            end
+        if not holding then return end
 
-            local target = GetClosest()
-            if not target then
-                return
-            end
+        local target = GetClosest()
+        if not target then return end
 
-            local predictedPosition = GetPredictedPosition(target)
+        local predictedPosition = GetPredictedPosition(target)
 
+        if mouseaim then
+            if not mousemoverel then return end
+
+            local screenPosition, onScreen =
+                camera:WorldToViewportPoint(predictedPosition)
+
+            if not onScreen then return end
+
+            local mousePosition = GetAimCenter()
+
+            local difference = Vector2.new(
+                screenPosition.X,
+                screenPosition.Y
+            ) - mousePosition
+
+            mousemoverel(
+                difference.X * smoothing,
+                difference.Y * smoothing
+            )
+        else
             camera.CFrame = CFrame.lookAt(
                 camera.CFrame.Position,
                 predictedPosition
             )
         end
-    )
+    end
+)
 end
