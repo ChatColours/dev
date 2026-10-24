@@ -31,6 +31,12 @@ circle.NumSides = 64
 circle.Filled = false
 circle.Color = Color3.new(1, 1, 1)
 
+local function GetCenter()
+    local viewport = Camera.ViewportSize
+    return Vector2.new(viewport.X / 2, viewport.Y / 2)
+end
+
+
 local function GetAimCenter()
     if mouseaim then
         local mousePosition = UserInputService:GetMouseLocation()
@@ -40,11 +46,6 @@ local function GetAimCenter()
     end
 
     return GetCenter()
-end
-
-local function GetCenter()
-    local viewport = Camera.ViewportSize
-    return Vector2.new(viewport.X / 2, viewport.Y / 2)
 end
 
 local function GetPredictedPosition(target)
