@@ -326,11 +326,6 @@ return function(Window, WindUI)
         if input.KeyCode == mouseaimKey then
             usemouseaim = false
         end
-
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            print("ended")
-            StopFastClick()
-        end
     end)
 
 RunService:BindToRenderStep(
