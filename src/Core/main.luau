@@ -13,7 +13,7 @@ local Hooks = {}
 
 local SupportedGames = {
     [11137575513] = {
-        BaseURL = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/TheChosenOne",
+        Folder = "TheChosenOne",
         Tabs = {
             "Build.luau"
         }
