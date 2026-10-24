@@ -52,14 +52,18 @@ local function StopFastClick()
 end
 
 local function StartFastClick()
-    if not fastClick or fastClickThread then
+    if fastClickThread or not fastClick then
         return
     end
 
-    holdingLMB = true
-
     fastClickThread = task.spawn(function()
-        while holdingLMB and fastClick do
+        while fastClick do
+            if not UserInputService:IsMouseButtonPressed(
+                Enum.UserInputType.MouseButton1
+            ) then
+                break
+            end
+
             if mouse1click then
                 mouse1click()
             end
