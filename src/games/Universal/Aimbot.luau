@@ -24,6 +24,7 @@ local mouseaimKey = Enum.KeyCode.F
 local mouseaim = false
 local smoothing = .1
 local playerLockedOn
+local usemouseaim = false
 
 local circle = Drawing.new("Circle")
 circle.Visible = false
@@ -258,7 +259,17 @@ return function(Window, WindUI)
             enabled = not enabled
             circle.Visible = enabled
         elseif input.KeyCode == mouseaimKey then
-            mouseaim = not mouseaim
+            mouseaim = true
+            usemouseaim = true
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input, gp)
+        if gp then return end
+
+        if input.KeyCode == mouseaimKey then
+            mouseaim = false
+            usemouseaim = false
         end
     end)
 
@@ -281,7 +292,7 @@ RunService:BindToRenderStep(
             holdKey
         )
 
-        if not holding then return end
+        if not holding and not usemouseaim then return end
 
         local target = GetClosest()
         if not target then return end
