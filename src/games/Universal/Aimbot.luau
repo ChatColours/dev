@@ -65,6 +65,7 @@ local function StartFastClick()
             end
 
             if mouse1click then
+                print("Simulate Click")
                 mouse1click()
             end
 
