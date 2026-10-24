@@ -268,7 +268,7 @@ return function(Window, WindUI)
         if gp then return end
 
         if input.KeyCode == mouseaimKey then
-            mouseaim = false
+            --mouseaim = false
             usemouseaim = false
         end
     end)
