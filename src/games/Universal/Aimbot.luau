@@ -16,6 +16,8 @@ local mouseKeys = {
     ["RMB"] = Enum.UserInputType.MouseButton2,
     ["MMB"] = Enum.UserInputType.MouseButton3
 }
+local fastClick = false
+local fastClickThread
 local radius = 120
 local wallCheck = true
 local teamCheck = true
@@ -156,6 +158,16 @@ return function(Window, WindUI)
     })
 
     Tab:Toggle({
+        Title = "Fast Click",
+        Desc = "Holding down will simulate multiple clicks, useful for semi weapons",
+        Type = "Checkbox",
+        Value = false, -- default value
+        Callback = function(state) 
+            fastClick = state
+        end
+    })
+
+    Tab:Toggle({
         Title = "Mouse Aimbot",
         Desc = "Moves the mouse onto players instead of the camera",
         Type = "Checkbox",
@@ -226,6 +238,8 @@ return function(Window, WindUI)
         end
     })
 
+
+
     Tab:Toggle({
         Title = "Wall Check",
         Desc = "Don't aim at players behind walls",
@@ -262,6 +276,18 @@ return function(Window, WindUI)
             mouseaim = true
             usemouseaim = true
         end
+
+        if fastClick then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                if not fastClickThread then
+                    fastClickThread = task.spawn(function()
+                        while task.wait() do
+                            if mouse1click then mouse1click() end
+                        end
+                    end)
+                end
+            end
+        end
     end)
 
     UserInputService.InputEnded:Connect(function(input, gp)
@@ -270,6 +296,11 @@ return function(Window, WindUI)
         if input.KeyCode == mouseaimKey then
             --mouseaim = false
             usemouseaim = false
+        end
+
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            task.cancel(fastClickThread)
+            fastClickThread = nil
         end
     end)
 
