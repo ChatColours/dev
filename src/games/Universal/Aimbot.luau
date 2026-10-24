@@ -357,9 +357,9 @@ return function(Window, WindUI)
             lead = value
         end
     })
-    local teams = game.Teams:GetChildren()
-    for i, v in ipairs(teams) do
-        v = v.Name
+    local teams = {}
+    for i, v in ipairs(game.Teams:GetChildren()) do
+        table.insert(teams, v.Name)
     end
     Tab:Dropdown({
         Title = "Team Exclusions",
