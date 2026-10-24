@@ -1,68 +1,4 @@
-local method = "hookfunction"
-local hooks = {
-    ["antikick1"] = nil,
-    ["antikick2"] = nil
-}
-local pass
-local player = game.Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local humanoid = char and char:WaitForChild("Humanoid")
-local HumanoidHook
-
-local function hookHumanoid()
-    if pass ~= true then return end
-    HumanoidHook = hookmetamethod(humanoid, "__index", newcclosure(function(self, key)
-        if typeof(self) == "Instance" and self:IsA("Humanoid") and hooks["HumanoidClient"] and hooks["HumanoidClient"] == true then
-            if key == "WalkSpeed" then
-                return 16
-            elseif key == "JumpPower" then
-                return 50
-            elseif key == "JumpHeight" then
-                return 7.2
-            end
-        end
-
-        return HumanoidHook(self, key)
-    end))
-end
-
-player.CharacterAdded:Connect(function(c)
-    char = c
-    humanoid = char:WaitForChild("Humanoid")
-
-    hookHumanoid()
-end)
-
-hookHumanoid()
-
-return function(Window, WindUI)
-    WindUI:Popup({
-    Title = "Load Anticheat Bypass tab?",
-    Icon = "triangle-alert",
-    Content = "This is a potentially dangerous tab to have loaded, which is why we ask first. We do not guarantee that this will bypass anticheats, but it may help bypass certain stuff.",
-    Buttons = {
-        {
-            Title = "Cancel",
-            Callback = function() pass = false end,
-            Variant = "Tertiary",
-        },
-        {
-            Title = "Continue",
-            Icon = "arrow-right",
-            Callback = function()
-                pass = true
-            end,
-            Variant = "Primary",
-        }
-    }
-})
-
-    while pass ~= true do
-        if pass == false then return end
-        task.wait()
-    end
-
-    local g = getinfo or debug.getinfo
+local g = getinfo or debug.getinfo
 local d = false
 local h = {}
 
@@ -121,7 +57,42 @@ end))
 setthreadidentity(7)
 
 
+local method = "hookfunction"
+local hooks = {
+    ["antikick1"] = nil,
+    ["antikick2"] = nil
+}
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char and char:WaitForChild("Humanoid")
+local HumanoidHook
 
+local function hookHumanoid()
+    HumanoidHook = hookmetamethod(humanoid, "__index", newcclosure(function(self, key)
+        if typeof(self) == "Instance" and self:IsA("Humanoid") and hooks["HumanoidClient"] and hooks["HumanoidClient"] == true then
+            if key == "WalkSpeed" then
+                return 16
+            elseif key == "JumpPower" then
+                return 50
+            elseif key == "JumpHeight" then
+                return 7.2
+            end
+        end
+
+        return HumanoidHook(self, key)
+    end))
+end
+
+player.CharacterAdded:Connect(function(c)
+    char = c
+    humanoid = char:WaitForChild("Humanoid")
+
+    hookHumanoid()
+end)
+
+hookHumanoid()
+
+return function(Window, WindUI)
     local Tab = Window:Tab({
         Title = "Bypasses",
         Icon = "bird", -- optional
