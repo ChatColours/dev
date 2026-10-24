@@ -98,7 +98,6 @@ return function(Window, WindUI)
     Tab:Toggle({
         Title = "Prevent Clientside Humanoid Checks",
         Desc = "This will return normal looking humanoid values to prevent being flagged if the client was to check.",
-        Icon = "bird",
         Type = "Checkbox",
         Locked = hookmetamethod == nil,
         Value = false, -- default value
@@ -110,7 +109,6 @@ return function(Window, WindUI)
     Tab:Toggle({
         Title = "Hook Getfenv",
         Desc = "Prevent executor leaks",
-        Icon = "bird",
         Type = "Checkbox",
         Locked = oth == nil and hookfunction == nil,
         Value = false, -- default value
@@ -137,7 +135,6 @@ return function(Window, WindUI)
     Tab:Toggle({
         Title = "Anti-Kick",
         Desc = "Only works if a localscript tries to kick you",
-        Icon = "bird",
         Type = "Checkbox",
         Value = false, -- default value
         Callback = function(state) 

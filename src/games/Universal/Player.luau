@@ -22,7 +22,6 @@ return function(Window, WindUI)
     Tab:Toggle({
         Title = "Enable Speed",
         Desc = "Toggle for walkspeed",
-        Icon = "bird",
         Type = "Checkbox",
         Value = false, -- default value
         Callback = function(state) 
@@ -56,7 +55,6 @@ return function(Window, WindUI)
     Tab:Toggle({
         Title = "Teleport Walk",
         Desc = "Toggle for TP Walk, makes you go faster without changing the humanoid speed",
-        Icon = "bird",
         Type = "Checkbox",
         Value = false, -- default value
         Callback = function(state) 
@@ -97,7 +95,6 @@ return function(Window, WindUI)
         Tab:Toggle({
         Title = "Enable Jump",
         Desc = "Toggle for jump",
-        Icon = "bird",
         Type = "Checkbox",
         Value = false, -- default value
         Callback = function(state) 
