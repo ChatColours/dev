@@ -16,13 +16,14 @@ local mouseKeys = {
     ["RMB"] = Enum.UserInputType.MouseButton2,
     ["MMB"] = Enum.UserInputType.MouseButton3
 }
-local fastClickThread = nil
+local triggerBotThread = nil
 local holdingLMB = false
-local fastClick = false
+local triggerBot = false
 local radius = 120
 local wallCheck = true
 local teamCheck = true
 local lead = 0
+
 local mouseaimKey = Enum.KeyCode.F
 local mouseaim = false
 local smoothing = .1
@@ -42,49 +43,49 @@ local function GetCenter()
     return Vector2.new(viewport.X / 2, viewport.Y / 2)
 end
 
-local function StopFastClick()
-    holdingLMB = false
+local function GetTriggerTarget()
+    local camera = workspace.CurrentCamera
+    if not camera then return nil end
 
-    if fastClickThread then
-        task.cancel(fastClickThread)
-        fastClickThread = nil
+    local center = camera.ViewportSize / 2
+    local ray = camera:ViewportPointToRay(center.X, center.Y)
+
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = Player.Character
+        and {Player.Character}
+        or {}
+
+    local result = workspace:Raycast(
+        ray.Origin,
+        ray.Direction * 1000,
+        params
+    )
+
+    if not result then return nil end
+
+    local character = result.Instance:FindFirstAncestorOfClass("Model")
+    if not character then return nil end
+
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid or humanoid.Health <= 0 then
+        return nil
     end
-end
 
-local function StartFastClick()
-    if fastClickThread or not fastClick then
-        return
+    local targetPlayer = Players:GetPlayerFromCharacter(character)
+    if not targetPlayer or targetPlayer == Player then
+        return nil
     end
 
-    fastClickThread = task.spawn(function()
-        local releaseChecks = 0
-        local maxReleaseChecks = 3
+    if teamCheck
+        and not targetPlayer.Neutral
+        and not Player.Neutral
+        and targetPlayer.Team ~= nil
+        and targetPlayer.Team == Player.Team then
+        return nil
+    end
 
-        while fastClick do
-            local holding = UserInputService:IsMouseButtonPressed(
-                Enum.UserInputType.MouseButton1
-            )
-
-            if not holding then
-                releaseChecks += 1
-
-                if releaseChecks >= maxReleaseChecks then
-                    warn("Confirmed release!")
-                    break
-                end
-            else
-                releaseChecks = 0
-            end
-
-            if mouse1click then
-                mouse1click()
-            end
-
-            task.wait(0.05)
-        end
-
-        fastClickThread = nil
-    end)
+    return targetPlayer
 end
 
 local function GetAimCenter()
@@ -203,17 +204,12 @@ return function(Window, WindUI)
     })
 
     Tab:Toggle({
-        Title = "Fast Click",
-        Desc = "Holding down will simulate multiple clicks, useful for semi weapons",
+        Title = "Trigger Bot",
+        Desc = "Players in the aimbot FOV will automatically be shot at",
         Type = "Checkbox",
         Value = false, -- default value
         Callback = function(state) 
-            fastClick = state
-            print("fast click: ".. tostring(fastClick))
-
-            if not state then
-                StopFastClick()
-            end
+            triggerBot = state
         end
     })
 
@@ -363,6 +359,10 @@ RunService:BindToRenderStep(
 
         local target = GetClosest()
         if not target then return end
+
+        if triggerBot and type(mouse1click) == "function" then
+            mouse1click()
+        end
 
         local predictedPosition = GetPredictedPosition(target)
 
