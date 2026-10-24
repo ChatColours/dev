@@ -12,6 +12,8 @@ local Settings = {
     Distance = false,
     Healthbar = false,
     Rainbow = false,
+    TeamCheck = false,
+    TeamColor = false,
 }
 
 local ESPColor = Color3.fromRGB(255, 255, 255)
@@ -49,6 +51,7 @@ local R15Bones = {
 
 local function NewDrawing(class, properties)
     local object = Drawing.new(class)
+
     for property, value in properties do
         object[property] = value
     end
@@ -108,7 +111,6 @@ local function CreateESP(player)
         Color = Color3.fromRGB(0, 255, 0),
     })
 
-    -- Maximum number of R15 skeleton connections
     for i = 1, #R15Bones do
         objects.Skeleton[i] = NewDrawing("Line", {
             Visible = false,
@@ -149,6 +151,33 @@ local function HideESP(objects)
             object.Visible = false
         end
     end
+end
+
+local function IsTeammate(player)
+    if player.Neutral or LocalPlayer.Neutral then
+        return false
+    end
+
+    return player.Team ~= nil
+        and player.Team == LocalPlayer.Team
+end
+
+local function GetESPColor(player)
+    -- Rainbow has highest priority
+    if Settings.Rainbow then
+        return Color3.fromHSV(
+            (time() * 0.2) % 1,
+            1,
+            1
+        )
+    end
+
+    -- Use the player's team colour
+    if Settings.TeamColor and not player.Neutral and player.Team then
+        return player.TeamColor.Color
+    end
+
+    return ESPColor
 end
 
 local function Project(position)
@@ -232,8 +261,13 @@ local function UpdateSkeleton(character, objects, color)
     end
 end
 
-local function UpdateESP(player, objects, color)
+local function UpdateESP(player, objects)
     HideESP(objects)
+
+    -- Hide teammates if Team Check is enabled
+    if Settings.TeamCheck and IsTeammate(player) then
+        return
+    end
 
     local character = player.Character
     if not character then
@@ -247,7 +281,7 @@ local function UpdateESP(player, objects, color)
         return
     end
 
-    local screenPosition, onScreen, depth = Project(root.Position)
+    local _, onScreen, depth = Project(root.Position)
 
     if not onScreen or depth <= 0 then
         return
@@ -259,11 +293,15 @@ local function UpdateESP(player, objects, color)
         return
     end
 
+    local color = GetESPColor(player)
+
     local boxCenter = boxPosition.X + boxSize.X / 2
     local boxBottom = boxPosition.Y + boxSize.Y
 
+    -- Skeleton ESP
     UpdateSkeleton(character, objects, color)
 
+    -- Box ESP
     if Settings.Boxes then
         local box = objects.Box
 
@@ -273,6 +311,7 @@ local function UpdateESP(player, objects, color)
         box.Visible = true
     end
 
+    -- Tracer ESP
     if Settings.Tracers then
         local tracer = objects.Tracer
 
@@ -286,6 +325,7 @@ local function UpdateESP(player, objects, color)
         tracer.Visible = true
     end
 
+    -- Name ESP
     if Settings.Names then
         local name = objects.Name
 
@@ -299,6 +339,7 @@ local function UpdateESP(player, objects, color)
         name.Visible = true
     end
 
+    -- Distance ESP
     if Settings.Distance then
         local distance = objects.Distance
 
@@ -356,55 +397,44 @@ local function UpdateESP(player, objects, color)
     end
 end
 
-local function GetESPColor()
-    if Settings.Rainbow then
-        return Color3.fromHSV(
-            (time() * 0.2) % 1,
-            1,
-            1
-        )
-    end
-
-    return ESPColor
-end
-
 return function(Window, WindUI)
     local Tab = Window:Tab({
         Title = "Visuals",
         Icon = "eye",
         Locked = false,
     })
-    local fov = workspace.CurrentCamera.FieldOfView
+
+    -- Custom FOV
+    local fov = Camera.FieldOfView
     local fovEnabled = false
 
     Tab:Toggle({
-    Title = "Custom FOV",
-    Desc = "Change your FOV",
-    Icon = "bird",
-    Type = "Checkbox",
-    Value = false, -- default value
-    Callback = function(state) 
-        fovEnabled = state
-    end
-})
+        Title = "Custom FOV",
+        Desc = "Change your camera's field of view",
+        Icon = "eye",
+        Type = "Checkbox",
+        Value = false,
 
-    local Slider = Tab:Slider({
-    Title = "FOV Amount",
-    Desc = "",
-    
-    -- To make float number supported, 
-    -- make the Step a float number.
-    -- example: Step = 0.1
-    Step = 1,
-    Value = {
-        Min = 1,
-        Max = 170,
-        Default = 70,
-    },
-    Callback = function(value)
-        fov = value
-    end
-})
+        Callback = function(state)
+            fovEnabled = state
+        end,
+    })
+
+    Tab:Slider({
+        Title = "FOV Amount",
+        Desc = "Adjust camera field of view",
+        Step = 1,
+
+        Value = {
+            Min = 1,
+            Max = 170,
+            Default = 70,
+        },
+
+        Callback = function(value)
+            fov = value
+        end,
+    })
 
     Tab:Section({
         Title = "Player ESP",
@@ -430,14 +460,34 @@ return function(Window, WindUI)
     AddToggle("Healthbar ESP", "Display player health bars", "Healthbar")
 
     Tab:Section({
+        Title = "ESP Filtering",
+    })
+
+    AddToggle(
+        "Team Check",
+        "Hide ESP for players on your team",
+        "TeamCheck"
+    )
+
+    Tab:Section({
         Title = "ESP Appearance",
     })
 
-    AddToggle("Rainbow ESP", "Cycle through rainbow colors", "Rainbow")
+    AddToggle(
+        "Team Colour ESP",
+        "Use each player's team colour for their ESP",
+        "TeamColor"
+    )
+
+    AddToggle(
+        "Rainbow ESP",
+        "Cycle through rainbow colours",
+        "Rainbow"
+    )
 
     Tab:Colorpicker({
         Title = "ESP Color",
-        Desc = "Default ESP color when rainbow is disabled",
+        Desc = "Default ESP colour when rainbow and team colours are disabled",
         Default = ESPColor,
         Transparency = 0,
 
@@ -446,6 +496,7 @@ return function(Window, WindUI)
         end,
     })
 
+    -- Initialize players
     for _, player in Players:GetPlayers() do
         CreateESP(player)
     end
@@ -460,19 +511,16 @@ return function(Window, WindUI)
 
     Connections.Render = RunService.RenderStepped:Connect(function()
         Camera = workspace.CurrentCamera
-
         if not Camera then
             return
         end
+
         if fovEnabled then
             Camera.FieldOfView = fov
         end
 
-        local color = GetESPColor()
-
         for player, objects in ESPObjects do
-            UpdateESP(player, objects, color)
+            UpdateESP(player, objects)
         end
     end)
-
 end

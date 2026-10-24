@@ -20,8 +20,10 @@ local radius = 120
 local wallCheck = true
 local teamCheck = true
 local lead = 0
+local mouseaimKey = Enum.KeyCode.F
 local mouseaim = false
 local smoothing = .1
+local playerLockedOn
 
 local circle = Drawing.new("Circle")
 circle.Visible = false
@@ -129,6 +131,16 @@ return function(Window, WindUI)
 
         Callback = function(value)
             toggleKey = Enum.KeyCode[value]
+        end
+    })
+
+        Tab:Keybind({
+        Title = "Mouse Aimbot Key",
+        Desc = "Keybind to toggle mouse aimbot",
+        Value = "F",
+
+        Callback = function(value)
+            mouseaimKey = Enum.KeyCode[value]
         end
     })
 
@@ -245,6 +257,8 @@ return function(Window, WindUI)
         if input.KeyCode == toggleKey then
             enabled = not enabled
             circle.Visible = enabled
+        elseif input.KeyCode == mouseaimKey then
+            mouseaim = not mouseaim
         end
     end)
 
