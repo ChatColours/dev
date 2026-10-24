@@ -3,12 +3,14 @@ local hooks = {
     ["antikick1"] = nil,
     ["antikick2"] = nil
 }
+local pass
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local humanoid = char and char:WaitForChild("Humanoid")
 local HumanoidHook
 
 local function hookHumanoid()
+    if pass ~= true then return end
     HumanoidHook = hookmetamethod(humanoid, "__index", newcclosure(function(self, key)
         if typeof(self) == "Instance" and self:IsA("Humanoid") and hooks["HumanoidClient"] and hooks["HumanoidClient"] == true then
             if key == "WalkSpeed" then
@@ -32,7 +34,7 @@ player.CharacterAdded:Connect(function(c)
 end)
 
 hookHumanoid()
-local pass
+
 return function(Window, WindUI)
     WindUI:Popup({
     Title = "Load Anticheat Bypass tab?",
