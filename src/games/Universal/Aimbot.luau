@@ -28,7 +28,14 @@ local lead = 0
 local mouseaimKey = Enum.KeyCode.F
 local mouseaim = false
 local smoothing = .1
-local playerLockedOn
+local lockedTarget
+
+local Settings = {
+    MaxDistance = 500,
+    TargetStickiness = 1.3,
+    DistanceWeight = 0.5,
+}
+
 local usemouseaim = false
 
 local circle = Drawing.new("Circle")
@@ -42,6 +49,25 @@ circle.Color = Color3.new(1, 1, 1)
 local function GetCenter()
     local viewport = Camera.ViewportSize
     return Vector2.new(viewport.X / 2, viewport.Y / 2)
+end
+
+local function IsExcluded(player)
+    if not teamCheck then return false end
+
+    local team = player.Team
+
+    if teamExclusions[team] then
+        return true
+    end
+
+    if team
+        and not player.Neutral
+        and not Player.Neutral
+        and team == Player.Team then
+        return true
+    end
+
+    return false
 end
 
 local function GetTriggerTarget()
@@ -78,12 +104,7 @@ local function GetTriggerTarget()
         return nil
     end
 
-    if teamCheck
-        and not targetPlayer.Neutral
-        and not Player.Neutral
-        and targetPlayer.Team ~= nil
-        and targetPlayer.Team == Player.Team
-        or teamExclusions[targetPlayer.Team.Name] then
+    if IsExcluded(targetPlayer) then
         return nil
     end
 
@@ -118,54 +139,116 @@ local function IsVisible(character, targetPart)
     return result == nil or result.Instance:IsDescendantOf(character)
 end
 
-local function GetClosest()
-    local closest = nil
-    local shortest = math.huge
-    local center = GetAimCenter()
-
-    for _, player in Players:GetPlayers() do
-        if player == Player then
-            continue
-        end
-
-        if teamCheck and player.Team ~= nil and player.Team == Player.Team then
-            continue
-        end
-
-        local character = player.Character
-        if not character then
-            continue
-        end
-
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        local head = character:FindFirstChild("Head")
-
-        if not humanoid or humanoid.Health <= 0 or not head then
-            continue
-        end
-
-        local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-
-        if not onScreen then
-            continue
-        end
-
-        local position = Vector2.new(screenPos.X, screenPos.Y)
-        local distance = (position - center).Magnitude
-
-        if distance > radius or distance >= shortest then
-            continue
-        end
-
-        if wallCheck and not IsVisible(character, head) then
-            continue
-        end
-
-        shortest = distance
-        closest = head
+local function IsValidTarget(player, character, head)
+    if player == Player then
+        return false
     end
 
-    return closest
+    if IsExcluded(player) then
+        return false
+    end
+
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+    if not humanoid or humanoid.Health <= 0 then
+        return false
+    end
+
+    local myRoot = Player.Character
+        and Player.Character:FindFirstChild("HumanoidRootPart")
+
+    if not myRoot then
+        return false
+    end
+
+    local distance3D = (head.Position - myRoot.Position).Magnitude
+
+    if distance3D > Settings.MaxDistance then
+        return false
+    end
+
+    if wallCheck and not IsVisible(character, head) then
+        return false
+    end
+
+    return true
+end
+
+local function GetTargetScore(head, center)
+    local screenPosition, onScreen =
+        Camera:WorldToViewportPoint(head.Position)
+
+    if not onScreen then
+        return nil
+    end
+
+    local screenDistance = (
+        Vector2.new(screenPosition.X, screenPosition.Y) - center
+    ).Magnitude
+
+    if screenDistance > radius then
+        return nil
+    end
+
+    local worldDistance = (
+        head.Position - Camera.CFrame.Position
+    ).Magnitude
+
+    -- Lower scores are better
+    local screenScore = screenDistance / math.max(radius, 1)
+    local worldScore = worldDistance / Settings.MaxDistance
+
+    local weight = Settings.DistanceWeight
+
+    return screenScore * (1 - weight) + worldScore * weight
+end
+
+local function GetClosest()
+    local center = GetAimCenter()
+
+    if lockedTarget then
+        local character = lockedTarget.Character
+        local head = character and character:FindFirstChild("Head")
+
+        if head and IsValidTarget(lockedTarget, character, head) then
+            local score = GetTargetScore(head, center)
+
+            if score then
+                return head
+            end
+        end
+
+        lockedTarget = nil
+    end
+
+    local bestPlayer = nil
+    local bestHead = nil
+    local bestScore = math.huge
+
+    for _, player in Players:GetPlayers() do
+        local character = player.Character
+        local head = character and character:FindFirstChild("Head")
+
+        if not head then
+            continue
+        end
+
+        if not IsValidTarget(player, character, head) then
+            continue
+        end
+
+        local score = GetTargetScore(head, center)
+
+        if score and score < bestScore then
+            bestScore = score
+            bestPlayer = player
+            bestHead = head
+        end
+    end
+
+    lockedTarget = bestPlayer
+
+    return bestHead
 end
 
 return function(Window, WindUI)
@@ -286,12 +369,12 @@ return function(Window, WindUI)
         Multi = true,
         AllowNone = true,
         Callback = function(option) 
-            for i, v in ipairs(option) do
-                teamExclusions[v] = true
-            end
-            for i, v in pairs(teamExclusions) do
-                if not table.find(option, i) then
-                    teamExclusions[i] = nil
+            table.clear(teamExclusions)
+            for key, value in option do
+                if type(key) == "number" then
+                    teamExclusions[value] = true
+                elseif value == true then
+                    teamExclusions[key] = true
                 end
             end
         end
@@ -320,6 +403,38 @@ return function(Window, WindUI)
 
         Callback = function(state)
             wallCheck = state
+        end
+    })
+
+    Tab:Slider({
+        Title = "Maximum Target Distance",
+        Desc = "Ignore targets beyond this distance",
+        Step = 25,
+
+        Value = {
+            Min = 25,
+            Max = 2000,
+            Default = 500,
+        },
+
+        Callback = function(value)
+            Settings.MaxDistance = value
+        end
+    })
+
+    Tab:Slider({
+        Title = "Distance Priority",
+        Desc = "How strongly nearby targets are preferred",
+        Step = 0.05,
+
+        Value = {
+            Min = 0,
+            Max = 1,
+            Default = 0.5,
+        },
+
+        Callback = function(value)
+            Settings.DistanceWeight = value
         end
     })
 
@@ -374,13 +489,19 @@ RunService:BindToRenderStep(
             or GetCenter()
         circle.Radius = radius
 
-        if not enabled then return end
+        if not enabled then
+            lockedTarget = nil
+            return
+        end
 
         local holding = UserInputService:IsMouseButtonPressed(
             holdKey
         )
 
-        if not holding and not usemouseaim then return end
+        if not holding and not usemouseaim then
+            lockedTarget = nil
+            return
+        end
 
         local target = GetClosest()
         if not target then return end
