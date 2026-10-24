@@ -298,7 +298,7 @@ return function(Window, WindUI)
             usemouseaim = false
         end
 
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and not fastClick then
             task.cancel(fastClickThread)
             fastClickThread = nil
         end
