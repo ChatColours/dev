@@ -9,7 +9,9 @@ end)
 local Speed, JumpPower = 16, 50
 local OgSpeed = 16
 local OgJump = 50
+local tpWalkSpeed = 10
 local SpeedEnabled, JumpEnabled = false, false
+local tpwalk
 return function(Window, WindUI)
     local Tab = Window:Tab({
         Title = "LocalPlayer",
@@ -48,6 +50,47 @@ return function(Window, WindUI)
         },
         Callback = function(value)
             Speed = value
+        end
+    })
+
+    Tab:Toggle({
+        Title = "Teleport Walk",
+        Desc = "Toggle for TP Walk, makes you go faster without changing the humanoid speed",
+        Icon = "bird",
+        Type = "Checkbox",
+        Value = false, -- default value
+        Callback = function(state) 
+            if state then
+                tpwalk = RunService.Heartbeat:Connect(function(dt: number)
+                    local direction = humanoid.MoveDirection
+                    if direction.Magnitude < 0.001 then
+                        return
+                    end
+
+                    local displace = direction.Unit * tpWalkSpeed * dt
+                    character:PivotTo(character:GetPivot() + displace)
+                end)
+            else
+                tpwalk:Disconnect()
+            end
+        end
+    })
+
+        Tab:Slider({
+        Title = "Teleport Walk Speed",
+        Desc = "How fast you should tpwalk",
+        
+        -- To make float number supported, 
+        -- make the Step a float number.
+        -- example: Step = 0.1
+        Step = 1,
+        Value = {
+            Min = 1,
+            Max = 100,
+            Default = 10,
+        },
+        Callback = function(value)
+            tpWalkSpeed = value
         end
     })
 

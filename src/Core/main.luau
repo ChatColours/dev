@@ -344,6 +344,7 @@ end
 local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
 init(Window, WindUI, "Universal/Home.luau")
 init(Window, WindUI, "Universal/Aimbot.luau")
+init(Window, WindUI, "Universal/Player.luau")
 init(Window, WindUI, "Universal/Visuals.luau")
 init(Window, WindUI, "Universal/Bypasses.luau")
 init(Window, WindUI, "Universal/Scripts.luau")
