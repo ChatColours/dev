@@ -1,17 +1,27 @@
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
+
+
 
 local Player = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
 local toggleKey = Enum.KeyCode.G
 local enabled = false
-
+local holdKey = Enum.UserInputType.MouseButton2
+local mouseKeys = {
+    ["LMB"] = Enum.UserInputType.MouseButton1,
+    ["RMB"] = Enum.UserInputType.MouseButton2,
+    ["MMB"] = Enum.UserInputType.MouseButton3
+}
 local radius = 120
 local wallCheck = true
 local teamCheck = true
 local lead = 0
+local mouseaim = false
+local smoothing = 0
 
 local circle = Drawing.new("Circle")
 circle.Visible = false
@@ -20,6 +30,17 @@ circle.Thickness = 1.5
 circle.NumSides = 64
 circle.Filled = false
 circle.Color = Color3.new(1, 1, 1)
+
+local function GetAimCenter()
+    if mouseAim then
+        local mousePosition = UserInputService:GetMouseLocation()
+        local topLeftInset = GuiService:GetGuiInset()
+
+        return mousePosition - topLeftInset
+    end
+
+    return GetCenter()
+end
 
 local function GetCenter()
     local viewport = Camera.ViewportSize
@@ -49,7 +70,7 @@ end
 local function GetClosest()
     local closest = nil
     local shortest = math.huge
-    local center = GetCenter()
+    local center = circle.Position
 
     for _, player in Players:GetPlayers() do
         if player == Player then
@@ -96,6 +117,31 @@ local function GetClosest()
     return closest
 end
 
+local function AimWithMouse()
+    if not mousemoverel then return end
+
+    local cam = workspace.CurrentCamera
+    local screenPosition, onScreen = camera:WorldToViewportPoint(
+        GetPredictedPosition(target)
+    )
+
+    if not onScreen then
+        return
+    end
+
+    local mousePosition = UserInputService:GetMouseLocation()
+
+    local difference = Vector2.new(
+        screenPosition.X,
+        screenPosition.Y
+    ) - mousePosition
+
+    mousemoverel(
+        difference.X * smoothing,
+        difference.Y * smoothing
+    )
+end
+
 return function(Window, WindUI)
     local Tab = Window:Tab({
         Title = "Aimbot",
@@ -110,6 +156,42 @@ return function(Window, WindUI)
 
         Callback = function(value)
             toggleKey = Enum.KeyCode[value]
+        end
+    })
+
+    Tab:Dropdown({
+        Title = "Hold Key",
+        Desc = "What mouse key should be held down to use aimbot",
+        Values = {"LMB", "RMB", "MMB"},
+        Value = "Category A",
+        Callback = function(option) 
+            holdKey = mouseKeys[option]
+        end
+    })
+
+    Tab:Toggle({
+        Title = "Mouse Aimbot",
+        Desc = "Moves the mouse onto players instead of the camera",
+        Type = "Checkbox",
+        Value = false, -- default value
+        Callback = function(state) 
+            mouseaim = state
+        end
+    })
+
+    Tab:Slider({
+        Title = "Mouse Aimbot Smoothing",
+        Desc = "How smooth cursor movement should be",
+        Step = 0.01,
+
+        Value = {
+            Min = 0,
+            Max = 1,
+            Default = 0,
+        },
+
+        Callback = function(value)
+            smoothing = value
         end
     })
 
@@ -204,7 +286,7 @@ return function(Window, WindUI)
 
             Camera = camera
 
-            circle.Position = GetCenter()
+            circle.Position = mouseaim and UserInputService:GetMouseLocation() or GetCenter()
             circle.Radius = radius
 
             if not enabled then
@@ -212,7 +294,7 @@ return function(Window, WindUI)
             end
 
             if not UserInputService:IsMouseButtonPressed(
-                Enum.UserInputType.MouseButton2
+                holdKey
             ) then
                 return
             end
