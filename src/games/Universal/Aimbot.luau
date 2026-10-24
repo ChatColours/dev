@@ -193,6 +193,7 @@ return function(Window, WindUI)
         Value = false, -- default value
         Callback = function(state) 
             fastClick = state
+            print("fast click: ".. tostring(fastClick))
 
             if not state then
                 StopFastClick()
@@ -312,6 +313,7 @@ return function(Window, WindUI)
         end
 
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            print("start")
             StartFastClick()
         end
     end)
@@ -322,6 +324,7 @@ return function(Window, WindUI)
         end
 
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            print("ended")
             StopFastClick()
         end
     end)
