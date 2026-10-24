@@ -55,15 +55,17 @@ local function StartFastClick()
     if fastClickThread or not fastClick then
         return
     end
-
+    print("Starting")
     fastClickThread = task.spawn(function()
+        print("Task made")
         while fastClick do
             if not UserInputService:IsMouseButtonPressed(
                 Enum.UserInputType.MouseButton1
             ) then
+                warn("Break")
                 break
             end
-
+            print("Continuing")
             if mouse1click then
                 print("Simulate Click")
                 mouse1click()
