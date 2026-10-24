@@ -21,7 +21,7 @@ local wallCheck = true
 local teamCheck = true
 local lead = 0
 local mouseaim = false
-local smoothing = 0
+local smoothing = .1
 
 local circle = Drawing.new("Circle")
 circle.Visible = false
@@ -39,10 +39,7 @@ end
 
 local function GetAimCenter()
     if mouseaim then
-        local mousePosition = UserInputService:GetMouseLocation()
-        local topLeftInset = GuiService:GetGuiInset()
-
-        return mousePosition - topLeftInset
+        return UserInputService:GetMouseLocation()
     end
 
     return GetCenter()
@@ -71,7 +68,7 @@ end
 local function GetClosest()
     local closest = nil
     local shortest = math.huge
-    local center = circle.Position
+    local center = GetAimCenter()
 
     for _, player in Players:GetPlayers() do
         if player == Player then
@@ -139,7 +136,7 @@ return function(Window, WindUI)
         Title = "Hold Key",
         Desc = "What mouse key should be held down to use aimbot",
         Values = {"LMB", "RMB", "MMB"},
-        Value = "Category A",
+        Value = "RMB",
         Callback = function(option) 
             holdKey = mouseKeys[option]
         end
@@ -161,7 +158,7 @@ return function(Window, WindUI)
         Step = 0.01,
 
         Value = {
-            Min = 0,
+            Min = 0.01,
             Max = 1,
             Default = 0,
         },
@@ -259,7 +256,9 @@ RunService:BindToRenderStep(
         if not camera then return end
 
         Camera = camera
-        circle.Position = GetAimCenter()
+        circle.Position = mouseaim
+            and UserInputService:GetMouseLocation()
+            or GetCenter()
         circle.Radius = radius
 
         if not enabled then return end
