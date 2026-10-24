@@ -32,7 +32,7 @@ circle.Filled = false
 circle.Color = Color3.new(1, 1, 1)
 
 local function GetAimCenter()
-    if mouseAim then
+    if mouseaim then
         local mousePosition = UserInputService:GetMouseLocation()
         local topLeftInset = GuiService:GetGuiInset()
 
@@ -264,7 +264,7 @@ RunService:BindToRenderStep(
         if not enabled then return end
 
         local holding = UserInputService:IsMouseButtonPressed(
-            Enum.UserInputType.MouseButton2
+            holdKey
         )
 
         if not holding then return end
