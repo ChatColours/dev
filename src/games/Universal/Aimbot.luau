@@ -53,6 +53,8 @@ end
 
 local function StartFastClick()
     if fastClickThread or not fastClick then
+        warn(fastClickThread ~= nil)
+        warn(fastClick)
         return
     end
     print("Starting")
