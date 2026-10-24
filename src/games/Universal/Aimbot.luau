@@ -53,23 +53,30 @@ end
 
 local function StartFastClick()
     if fastClickThread or not fastClick then
-        warn(fastClickThread ~= nil)
-        warn(fastClick)
         return
     end
-    print("Starting")
+
     fastClickThread = task.spawn(function()
-        print("Task made")
+        local releaseChecks = 0
+        local maxReleaseChecks = 3
+
         while fastClick do
-            if not UserInputService:IsMouseButtonPressed(
+            local holding = UserInputService:IsMouseButtonPressed(
                 Enum.UserInputType.MouseButton1
-            ) then
-                warn("Break")
-                break
+            )
+
+            if not holding then
+                releaseChecks += 1
+
+                if releaseChecks >= maxReleaseChecks then
+                    warn("Confirmed release!")
+                    break
+                end
+            else
+                releaseChecks = 0
             end
-            print("Continuing")
+
             if mouse1click then
-                print("Simulate Click")
                 mouse1click()
             end
 
