@@ -13,6 +13,7 @@ local Range = {
     Build = 24,
     Delete = 70
 }
+
 local function GetBricks()
     table.clear(Bricks)
     for _, part in ipairs(BricksPath:GetDescendants()) do
@@ -78,10 +79,8 @@ return function(Window, WindUI)
                 Connections["DelAura"] = RunService.RenderStepped:Connect(function()
                     local Event = Globals.GetEvent(Globals.GetTool("Delete"))
                     if Event then
-                        local blocks = GetBlocksInRange(Range.Delete)
-                        for i, v in ipairs(blocks) do
-                            Event:FireServer(v, Player.Character.HumanoidRootPart.Position)
-                        end
+                        local block = Globals.getNearestPart(Range.Delete)
+                        Event:FireServer(block, Player.Character.HumanoidRootPart.Position)
                     end
                 end)
             else
@@ -114,18 +113,16 @@ return function(Window, WindUI)
                     
                     local Event = Globals.GetEvent(Globals.GetTool("Paint"))
                     if Event then
-                        local blocks = GetBlocksInRange(Range.Paint)
-                        for i, v in ipairs(blocks) do
-                            Event:FireServer(
-                                v,
-                                Enum.NormalId.Front,
-                                Player.Character.HumanoidRootPart.Position,
-                                "both \xF0\x9F\xA4\x9D",
-                                Color3.fromHSV(math.random(), 1, 1),
-                                Materials[math.random(1, #Materials)],
-                                ""
-                            )
-                        end
+                        local block = Globals.getNearestPart(Range.Paint)
+                        Event:FireServer(
+                            block,
+                            Enum.NormalId.Front,
+                            Player.Character.HumanoidRootPart.Position,
+                            "both \xF0\x9F\xA4\x9D",
+                            Color3.fromHSV(math.random(), 1, 1),
+                            Materials[math.random(1, #Materials)],
+                            ""
+                        )
                     end
                 end)
             else
