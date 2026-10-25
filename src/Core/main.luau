@@ -51,7 +51,10 @@ local ExeFunctions = {
     ["hookmetamethod"] = type(hookmetamethod) == "function",
     ["oth.hook"] = oth ~= nil and type(oth.hook) == "function",
     ["oth.unhook"] = oth ~= nil and type(oth.unhook) == "function",
-    ["isnetworkowner"] = type(isnetworkowner) == "function"
+    ["isnetworkowner"] = type(isnetworkowner) == "function",
+    ["newcclosure"] = type(newcclosure) == "function",
+    ["getnamecallmethod"] = type(getnamecallmethod) == "function",
+    ["getgc"] = type(getgc) == "function"
 }
 
 local function GetFailedAndPassed()
@@ -214,7 +217,7 @@ local passedFunctions, failedFunctions = GetFailedAndPassed()
 local supportedFunctionstxt = `Your executor, {identifyexecutor()}, supports {tostring(passedFunctions)} out of {tostring(passedFunctions + failedFunctions)} \n \n`
 
 for i, v in pairs(ExeFunctions) do
-    supportedFunctionstxt ..= i .. ": " .. (v == true and "✅" or "❌") .. "\n"
+    supportedFunctionstxt ..= i .. ": " .. (v == true and `<font color="rgb(0,255,0)">✓</font>` or "❌") .. "\n"
 end
 
 ReadMe:Paragraph({
@@ -293,9 +296,6 @@ local init = loadstring(game:HttpGet(
 ))()
 
 init(Window, WindUI, "Universal/Home.luau")
-
-Tabs.UniversalAimbot = init(Window, WindUI, "Universal/Aimbot.luau")
-
 init(Window, WindUI, "Universal/Player.luau")
 init(Window, WindUI, "Universal/Visuals.luau")
 init(Window, WindUI, "Universal/Servers.luau")

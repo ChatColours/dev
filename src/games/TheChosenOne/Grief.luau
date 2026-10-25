@@ -1,9 +1,13 @@
+local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
+local Globals = require(Loader.Require("src/games/TheChosenOne/Global.luau"))
+
 local RunService = game:GetService("RunService")
 local Player = game.Players.LocalPlayer
 local range = 10
 local paintColour = 0
 local blocksInRange = {}
 local Bricks = workspace:WaitForChild("Bricks")
+
 local function GetBlocksInRange()
     for i, v in ipairs(Bricks) do
         if (v.Position - Player.Character.HumanoidRootPart.Position).Magnitude <= range then
@@ -50,7 +54,7 @@ return function(Window, WindUI)
     Callback = function(state) 
         if state then
             Connections["DelAura"] = RunService.RenderStepped:Connect(function()
-                local delTool = Player.Backpack:FindFirstChild("Delete") or Player.Character:FindFirstChild("Delete")
+                local delTool = Globals.GetEvent(Globals.GetTool("Delete"))
                 if delTool then
                     for i, v in ipairs(blocksInRange) do
                         delTool.Script.Event:FireServer(v, Player.Character.HumanoidRootPart.Position)
@@ -70,7 +74,7 @@ return function(Window, WindUI)
     Callback = function(state) 
         if state then
             Connections["PaintAura"] = RunService.RenderStepped:Connect(function()
-                local Paint = Player.Backpack:FindFirstChild("Paint") or Player.Character:FindFirstChild("Paint")
+                local Paint = Globals.GetEvent(Globals.GetTool("Paint"))
                 if Paint then
                     for i, v in ipairs(blocksInRange) do
                         Paint.Script.Event:FireServer(
@@ -98,7 +102,7 @@ return function(Window, WindUI)
     Callback = function(state) 
         if state then
             Connections["BuildAura"] = RunService.RenderStepped:Connect(function()
-                local Build = Player.Backpack:FindFirstChild("Build") or Player.Character:FindFirstChild("Build")
+                local Build = Globals.GetEvent(Globals.GetTool("Build"))
                 if Build then
                     Build.Script.Event:FireServer(workspace.Terrain, Enum.NormalId.Top, getPositionAround(Player.Character.HumanoidRootPart, 5, 20), "normal")
                 end
@@ -108,4 +112,8 @@ return function(Window, WindUI)
         end
     end
 })
+
+    Connections["BlockCheck"] = RunService.Heartbeat:Connect(function()
+        GetBlocksInRange()
+    end)
 end

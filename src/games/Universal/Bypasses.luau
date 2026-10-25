@@ -95,7 +95,7 @@ hookHumanoid()
 return function(Window, WindUI)
     local Tab = Window:Tab({
         Title = "Bypasses",
-        Icon = "bird", -- optional
+        Icon = "shield", -- optional
         Locked = false,
     })
 
