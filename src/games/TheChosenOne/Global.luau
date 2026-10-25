@@ -39,25 +39,6 @@ function Globals.GetTool(name : string): Tool?
     end
 end
 
-function Globals.getNearestPart(maxRange : number): BasePart?
-	local candidates = {}
-	local hrp = Character and Character:FindFirstChild("HumanoidRootPart")
-	if not hrp then return end
-
-	for part in pairs(validParts) do
-		if part:IsA("Part") then
-			local d = (hrp.Position - part.Position).Magnitude
-			if d <= maxRange then
-				table.insert(candidates, part)
-			end
-		end
-	end
-
-	if #candidates == 0 then return end
-
-	return candidates[math.random(1, #candidates)]
-end
-
 function Globals.GetEvent(tool : Tool): RemoteEvent?
     if tool then
         local Script = tool:FindFirstChild("Script")

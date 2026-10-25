@@ -14,6 +14,44 @@ local Range = {
     Delete = 70
 }
 
+local validParts = {}
+
+for _, v in ipairs(BricksPath:GetDescendants()) do
+	if v:IsA("BasePart") then
+		validParts[v] = true
+	end
+end
+BricksPath.DescendantAdded:Connect(function(obj)
+	if obj:IsA("BasePart") then
+		validParts[obj] = true
+	end
+end)
+BricksPath.DescendantRemoving:Connect(function(obj)
+	if validParts[obj] then
+		validParts[obj] = nil
+	end
+end)
+
+
+local function getNearestPart(maxRange : number): BasePart?
+	local candidates = {}
+	local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	for part in pairs(validParts) do
+		if part:IsA("Part") then
+			local d = (hrp.Position - part.Position).Magnitude
+			if d <= maxRange then
+				table.insert(candidates, part)
+			end
+		end
+	end
+
+	if #candidates == 0 then return end
+
+	return candidates[math.random(1, #candidates)]
+end
+
 local function GetBricks()
     table.clear(Bricks)
     for _, part in ipairs(BricksPath:GetDescendants()) do
@@ -79,7 +117,7 @@ return function(Window, WindUI)
                 Connections["DelAura"] = RunService.RenderStepped:Connect(function()
                     local Event = Globals.GetEvent(Globals.GetTool("Delete"))
                     if Event then
-                        local block = Globals.getNearestPart(Range.Delete)
+                        local block = getNearestPart(Range.Delete)
                         Event:FireServer(block, Player.Character.HumanoidRootPart.Position)
                     end
                 end)
@@ -113,7 +151,7 @@ return function(Window, WindUI)
                     
                     local Event = Globals.GetEvent(Globals.GetTool("Paint"))
                     if Event then
-                        local block = Globals.getNearestPart(Range.Paint)
+                        local block = getNearestPart(Range.Paint)
                         Event:FireServer(
                             block,
                             Enum.NormalId.Front,
