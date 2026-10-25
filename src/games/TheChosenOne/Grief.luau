@@ -9,7 +9,7 @@ local blocksInRange = {}
 local Bricks = workspace:WaitForChild("Bricks")
 
 local function GetBlocksInRange()
-    for i, v in ipairs(Bricks) do
+    for i, v in ipairs(Bricks:GetChildren()) do
         if (v.Position - Player.Character.HumanoidRootPart.Position).Magnitude <= range then
             table.insert(blocksInRange, v)
         else
