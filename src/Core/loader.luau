@@ -17,7 +17,7 @@ function loader.Require(path)
     end)
     
     if not success then
-        warn(`Failed to load {url} -> {result}`)
+        warn(`Failed to load {url} -> {result}: {debug.traceback()}`)
         return nil
     end
 
