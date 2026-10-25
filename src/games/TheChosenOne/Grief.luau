@@ -80,11 +80,8 @@ return function(Window, WindUI)
                     if Event then
                         local blocks = GetBlocksInRange(Range.Delete)
                         for i, v in ipairs(blocks) do
-                            print("Firing")
                             Event:FireServer(v, Player.Character.HumanoidRootPart.Position)
                         end
-                    else
-                        warn("No event")
                     end
                 end)
             else
