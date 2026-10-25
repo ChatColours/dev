@@ -1,5 +1,5 @@
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
-local Globals = require(Loader.Require("src/games/TheChosenOne/Global.luau"))
+local Globals = Loader.Require("src/games/TheChosenOne/Global.luau")
 
 local RunService = game:GetService("RunService")
 local Player = game.Players.LocalPlayer

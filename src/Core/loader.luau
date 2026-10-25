@@ -6,10 +6,10 @@ function loader.Require(path)
     local a = tick()
 
     if cache[path] then
-        print(`Loaded {path} in {tostring(tick() - a)} (CACHED)`)
+        print(`[STEVEHUB] Loaded {path} in {tostring(tick() - a)} (CACHED)`)
         return cache[path]
     end
-    print("Loading: ".. baseurl.. path)
+    print("[STEVEHUB] Loading: ".. baseurl.. path)
     local url = baseurl.. path
 
     local success, result = pcall(function()
@@ -17,12 +17,12 @@ function loader.Require(path)
     end)
     
     if not success then
-        warn(`Failed to load {url} -> {result}: {debug.traceback()}`)
+        warn(`[STEVEHUB.REQUIRE] Failed to load {url} -> {result}: {debug.traceback()}`)
         return nil
     end
 
     cache[path] = result
-     print(`Loaded {path} in {tostring(tick() - a)}`)
+     print(`[STEVEHUB] Loaded {path} in {tostring(tick() - a)}`)
     return result
 end
 

@@ -9,12 +9,12 @@ local function Execute(path, Window, WindUI, RequiredTab)
     end)
 
     if not success then
-        warn(`Error fetching {path} -> {result}: {debug.traceback()}`)
+        warn(`[STEVEHUB.INIT] Error fetching {path} -> {result}: {debug.traceback()}`)
         return nil
     end
 
     if type(result) ~= "function" then
-        warn(`Invalid module {path} -> Expected function, got {type(result)}: {debug.traceback()}`)
+        warn(`[STEVEHUB.INIT] Invalid module {path} -> Expected function, got {type(result)}: {debug.traceback()}`)
         return nil
     end
 
@@ -23,11 +23,11 @@ local function Execute(path, Window, WindUI, RequiredTab)
     end)
 
     if not moduleSuccess then
-        warn(`Error loading {path} -> {tab}: {debug.traceback()}`)
+        warn(`[STEVEHUB.INIT] Error loading {path} -> {tab}: {debug.traceback()}`)
         return nil
     end
 
-    print(`Loaded {path} in {os.clock() - start} seconds`)
+    print(`[STEVEHUB] Loaded {path} in {os.clock() - start} seconds`)
 
     return tab
 end
