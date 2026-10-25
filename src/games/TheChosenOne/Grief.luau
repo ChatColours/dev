@@ -16,6 +16,7 @@ local function GetBricks()
             table.insert(Bricks, part)
         end
     end
+    return Bricks
 end
 
 local function GetBlocksInRange()
