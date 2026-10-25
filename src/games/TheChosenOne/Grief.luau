@@ -20,6 +20,8 @@ local function GetBricks()
 end
 
 local function GetBlocksInRange()
+    GetBricks()
+    print(type(Bricks))
     for i, v in ipairs(Bricks) do
         if (v.Position - Player.Character.HumanoidRootPart.Position).Magnitude <= range then
             table.insert(blocksInRange, v)
