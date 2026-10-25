@@ -16,7 +16,7 @@ local SupportedGames = {
     [11137575513] = {
         Folder = "TheChosenOne",
         Tabs = {
-            ["Build.luau"] = ""
+            ["Grief.luau"] = ""
         }
     },
 
