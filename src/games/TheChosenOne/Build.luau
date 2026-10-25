@@ -46,8 +46,6 @@ return function(Window, WindUI)
     Tab:Toggle({
     Title = "Delete Aura",
     Desc = "delete cubes that are in range",
-    Icon = "bird",
-    Type = "Checkbox",
     Value = false, -- default value
     Callback = function(state) 
         if state then
@@ -68,8 +66,6 @@ return function(Window, WindUI)
     Tab:Toggle({
     Title = "Paint Aura",
     Desc = "rainbow paint cubes in range",
-    Icon = "bird",
-    Type = "Checkbox",
     Value = false, -- default value
     Callback = function(state) 
         if state then
@@ -98,8 +94,6 @@ return function(Window, WindUI)
     Tab:Toggle({
     Title = "Build Aura",
     Desc = "build cubes in range",
-    Icon = "bird",
-    Type = "Checkbox",
     Value = false, -- default value
     Callback = function(state) 
         if state then
