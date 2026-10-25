@@ -1,26 +1,37 @@
 local baseUrl = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/"
-print("v2")
-local function Execute(link, Window, WindUI, TabName)
-    local Start = tick()
+
+local function Execute(path, Window, WindUI, RequiredTab)
+    local start = os.clock()
+    local url = baseUrl .. path
+
     local success, result = pcall(function()
-        return loadstring(game:HttpGet(link))()
+        return loadstring(game:HttpGet(url))()
     end)
-    warn(type(result), result)
-    if success then
-        local module_success, module_err = pcall(function()
-            result(Window, WindUI)
-        end)
-        if not module_success then
-            warn(`Error loading {TabName} -> {module_err}`)
-        else
-            local Finish = tick() - Start
-            print(`Loaded {TabName} module in {Finish} seconds`)
-        end
-    else
-        warn(`Error fetching {TabName} -> {result}`)
+
+    if not success then
+        warn(`Error fetching {path} -> {result}`)
+        return nil
     end
+
+    if type(result) ~= "function" then
+        warn(`Invalid module {path} -> Expected function, got {type(result)}`)
+        return nil
+    end
+
+    local moduleSuccess, tab = pcall(function()
+        return result(Window, WindUI, RequiredTab)
+    end)
+
+    if not moduleSuccess then
+        warn(`Error loading {path} -> {tab}`)
+        return nil
+    end
+
+    print(`Loaded {path} in {os.clock() - start} seconds`)
+
+    return tab
 end
 
-return function(Window, WindUI, Filename)
-    Execute(baseUrl.. Filename, Window, WindUI, Filename)
+return function(Window, WindUI, Filename, RequiredTab)
+    return Execute(Filename, Window, WindUI, RequiredTab)
 end

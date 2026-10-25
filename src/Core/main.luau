@@ -1,5 +1,6 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
+local Tabs = {}
 
 local FetchAsset = Loader.Require("src/Core/Utilities/files.luau")
 local ServerSearch = Loader.Require("src/Modules/ServerSearch.luau")
@@ -15,15 +16,23 @@ local SupportedGames = {
     [11137575513] = {
         Folder = "TheChosenOne",
         Tabs = {
-            "Build.luau"
+            ["Build.luau"] = ""
         }
-    }, -- TCO
+    },
+
     [86799185313399] = {
         Folder = "PatrolCompton",
         Tabs = {
-            "/cars.luau"
+            ["cars.luau"] = ""
         }
-    } -- Patrol Compton
+    },
+
+    [155615604] = {
+        Folder = "PrisonLife",
+        Tabs = {
+            ["Aimbot.luau"] = "UniversalAimbot"
+        }
+    }
 }
 
 local function SafeRead(path : string)
@@ -279,15 +288,40 @@ ReadMe:Paragraph({
 
 Window:Divider()
 
-local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
+local init = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"
+))()
+
 init(Window, WindUI, "Universal/Home.luau")
-init(Window, WindUI, "Universal/Aimbot.luau")
+
+Tabs.UniversalAimbot = init(Window, WindUI, "Universal/Aimbot.luau")
+
 init(Window, WindUI, "Universal/Player.luau")
 init(Window, WindUI, "Universal/Visuals.luau")
+init(Window, WindUI, "Universal/Servers.luau")
 init(Window, WindUI, "Universal/Scripts.luau")
 
-if SupportedGames[game.PlaceId] then
-    for i, v in ipairs(SupportedGames[game.PlaceId].Tabs) do
-        init(Window, WindUI, SupportedGames[game.PlaceId].BaseURL.. v)
+local supported = SupportedGames[game.PlaceId]
+
+if supported then
+    for filename, requiredTab in pairs(supported.Tabs) do
+        local path = supported.Folder .. "/" .. filename
+
+        local tab = nil
+
+        if requiredTab ~= "" then
+            tab = Tabs[requiredTab]
+
+            if not tab then
+                warn(`Missing required tab: {requiredTab} for {path}`)
+                continue
+            end
+        end
+
+        init(Window, WindUI, path, tab)
     end
 end
+
+queueonteleport(game:HttpGet(
+    "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/main.luau"
+))

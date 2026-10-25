@@ -16,10 +16,11 @@ local mouseKeys = {
     ["RMB"] = Enum.UserInputType.MouseButton2,
     ["MMB"] = Enum.UserInputType.MouseButton3
 }
+local AimbotEnabled = false
 local teamExclusions = {}
-local triggerBotThread = nil
-local holdingLMB = false
-local triggerBot = false
+
+
+_G.triggerBot = false
 local radius = 120
 local wallCheck = true
 local teamCheck = true
@@ -253,9 +254,18 @@ end
 
 return function(Window, WindUI)
     local Tab = Window:Tab({
-        Title = "Aimbot",
+        Title = "Universal Aimbot",
         Icon = "crosshair",
         Locked = false,
+    })
+
+    Tab:Toggle({
+        Title = "Aimbot Enabled",
+        Desc = "Whether the whole module should be enabled or not",
+        Value = false,
+        Callback = function(state) 
+            AimbotEnabled = state
+        end
     })
 
     Tab:Keybind({
@@ -294,7 +304,7 @@ return function(Window, WindUI)
         Type = "Checkbox",
         Value = false, -- default value
         Callback = function(state) 
-            triggerBot = state
+            _G.triggerBot = state
         end
     })
 
@@ -451,7 +461,7 @@ return function(Window, WindUI)
     })
 
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then
+        if gameProcessed or not AimbotEnabled then
             return
         end
 
@@ -480,6 +490,8 @@ RunService:BindToRenderStep(
     "SteveHubAimbot",
     Enum.RenderPriority.Camera.Value + 1,
     function()
+        if not AimbotEnabled then return end
+
         local camera = workspace.CurrentCamera
         if not camera then return end
 
@@ -506,7 +518,7 @@ RunService:BindToRenderStep(
         local target = GetClosest()
         if not target then return end
 
-        if triggerBot and type(mouse1click) == "function" then
+        if _G.triggerBot and type(mouse1click) == "function" then
             mouse1click()
         end
 
@@ -539,4 +551,6 @@ RunService:BindToRenderStep(
         end
     end
 )
+
+return Tab
 end
