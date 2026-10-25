@@ -25,15 +25,13 @@ end
 
 local function GetBlocksInRange(range)
     GetBricks()
+    local blocks = {}
     for i, v in ipairs(Bricks) do
         if (v.Position - Player.Character.HumanoidRootPart.Position).Magnitude <= range then
-            table.insert(blocksInRange, v)
-        else
-            if table.find(blocksInRange, v) then
-                table.remove(blocksInRange, table.find(blocksInRange, v))
-            end
+            table.insert(blocks, v)
         end
     end
+    return blocks
 end
 
 local function getPositionAround(part, minRange, maxRange)
@@ -72,9 +70,13 @@ return function(Window, WindUI)
                 Connections["DelAura"] = RunService.RenderStepped:Connect(function()
                     local Event = Globals.GetEvent(Globals.GetTool("Delete"))
                     if Event then
-                        for i, v in ipairs(blocksInRange) do
+                        local blocks = GetBlocksInRange(Range.Delete)
+                        for i, v in ipairs(blocks) do
+                            print("Firing")
                             Event:FireServer(v, Player.Character.HumanoidRootPart.Position)
                         end
+                    else
+                        warn("No event")
                     end
                 end)
             else
