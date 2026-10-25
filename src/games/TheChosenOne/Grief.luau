@@ -6,10 +6,20 @@ local Player = game.Players.LocalPlayer
 local range = 10
 local paintColour = 0
 local blocksInRange = {}
-local Bricks = workspace:WaitForChild("Bricks")
+local BricksPath = workspace:WaitForChild("Bricks")
+local Bricks = {}
+
+local function GetBricks()
+    table.clear(Bricks)
+    for _, part in ipairs(BricksPath:GetDescendants()) do
+        if part:IsA("Part") then
+            table.insert(Bricks, part)
+        end
+    end
+end
 
 local function GetBlocksInRange()
-    for i, v in ipairs(Bricks:GetChildren()) do
+    for i, v in ipairs(GetBricks()) do
         if (v.Position - Player.Character.HumanoidRootPart.Position).Magnitude <= range then
             table.insert(blocksInRange, v)
         else
