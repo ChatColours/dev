@@ -23,15 +23,23 @@ local function GetBricks()
     return Bricks
 end
 
-local function GetBlocksInRange(range)
-    GetBricks()
-    local blocks = {}
-    for i, v in ipairs(Bricks) do
-        if (v.Position - Player.Character.HumanoidRootPart.Position).Magnitude <= range then
-            table.insert(blocks, v)
-        end
+local Params = OverlapParams.new()
+Params.FilterType = Enum.RaycastFilterType.Include
+Params.FilterDescendantsInstances = {BricksPath}
+
+local function GetBlocksInRange(radius: number)
+    local Character = Player.Character
+    local Root = Character and Character:FindFirstChild("HumanoidRootPart")
+
+    if not Root then
+        return {}
     end
-    return blocks
+
+    return workspace:GetPartBoundsInRadius(
+        Root.Position,
+        radius,
+        Params
+    )
 end
 
 local function getPositionAround(part, minRange, maxRange)
@@ -109,14 +117,14 @@ return function(Window, WindUI)
                     
                     local Event = Globals.GetEvent(Globals.GetTool("Paint"))
                     if Event then
-                        local blocks = GetBlocksInRange()
+                        local blocks = GetBlocksInRange(Range.Paint)
                         for i, v in ipairs(blocks) do
                             Event:FireServer(
                                 v,
                                 Enum.NormalId.Front,
                                 Player.Character.HumanoidRootPart.Position,
                                 "both \xF0\x9F\xA4\x9D",
-                                Color3.fromHSV(math.random(0, 1), 1, 1),
+                                Color3.fromHSV(math.random(), 1, 1),
                                 Materials[math.random(1, #Materials)],
                                 ""
                             )
