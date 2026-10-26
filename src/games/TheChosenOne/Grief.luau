@@ -15,71 +15,37 @@ local Range = {
     Delete = 70
 }
 
-local validParts = {}
-
-for _, v in ipairs(BricksPath:GetDescendants()) do
-	if v:IsA("BasePart") then
-		validParts[v] = true
-	end
-end
-BricksPath.DescendantAdded:Connect(function(obj)
-	if obj:IsA("BasePart") then
-		validParts[obj] = true
-	end
-end)
-BricksPath.DescendantRemoving:Connect(function(obj)
-	if validParts[obj] then
-		validParts[obj] = nil
-	end
-end)
-
-
-local function getNearestPart(maxRange : number): BasePart?
-	local candidates = {}
-	local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-	if not hrp then return end
-
-	for part in pairs(validParts) do
-		if part:IsA("Part") then
-			local d = (hrp.Position - part.Position).Magnitude
-			if d <= maxRange then
-				table.insert(candidates, part)
-			end
-		end
-	end
-
-	if #candidates == 0 then return end
-
-	return candidates[math.random(1, #candidates)]
-end
-
-local function GetBricks()
-    table.clear(Bricks)
-    for _, part in ipairs(BricksPath:GetDescendants()) do
-        if part:IsA("Part") then
-            table.insert(Bricks, part)
-        end
-    end
-    return Bricks
-end
-
 local Params = OverlapParams.new()
 Params.FilterType = Enum.RaycastFilterType.Include
 Params.FilterDescendantsInstances = {BricksPath}
+Params.MaxParts = 100
 
-local function GetBlocksInRange(radius: number)
-    local Character = Player.Character
-    local Root = Character and Character:FindFirstChild("HumanoidRootPart")
+local function getNearestPart(maxRange: number): Part?
+    local Root = Player.Character
+        and Player.Character:FindFirstChild("HumanoidRootPart")
 
-    if not Root then
-        return {}
-    end
+    if not Root then return nil end
 
-    return workspace:GetPartBoundsInRadius(
+    local Parts = workspace:GetPartBoundsInRadius(
         Root.Position,
-        radius,
+        maxRange,
         Params
     )
+
+    local Selected = nil
+    local Count = 0
+
+    for _, Part in Parts do
+        if Part:IsA("Part") then
+            Count += 1
+
+            if math.random(Count) == 1 then
+                Selected = Part
+            end
+        end
+    end
+
+    return Selected
 end
 
 local function getPositionAround(part, minRange, maxRange)
@@ -153,6 +119,7 @@ return function(Window, WindUI)
                     local Event = Globals.GetEvent(Globals.GetTool("Paint"))
                     if Event then
                         local block = getNearestPart(Range.Paint)
+                        if not block then return end
                         local colour = PaintColours and Color3.fromHSV(math.random(), 1, 1) or block.Color
                         local material = PaintMaterials and Materials[math.random(1, #Materials)] or block.Material.Name:lower()
                         Event:FireServer(
