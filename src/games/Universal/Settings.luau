@@ -1,4 +1,4 @@
-local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
+--local init = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/games/init.luau"))()
 local ogCap = getfpscap and getfpscap()
 local UnlockFPS = false
 local saveName = "main"
