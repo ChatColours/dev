@@ -1,7 +1,7 @@
 local NecessaryFiles = {
     "fold.Steve",
     "fold.Steve/assets",
-    "file.Steve/config.json",
+    "fold.Steve/Configurations",
 }
 
 for _, v in NecessaryFiles do
@@ -15,6 +15,23 @@ for _, v in NecessaryFiles do
         end
     end
 end
+--[[
+local FileFuncts = {}
+
+function FileFuncts.Write(path : string, data : string)
+    if not data then
+        data = "nil"
+    end
+
+    writefile(path, data)
+end
+function FileFuncts.Read(path : string): string?
+    if isfile(path) then
+        return readfile(path), true
+    else
+        return "", false
+    end
+end]]
 
 return function(FileName, Link)
     if isfile("Steve/assets/".. FileName) then
@@ -29,4 +46,4 @@ return function(FileName, Link)
         end
     end
     return nil
-end
+end --, FileFuncts

@@ -100,6 +100,8 @@ local Window = WindUI:CreateWindow({
         end,
     },
 })
+_G.ConfigManager = Window.ConfigManager
+
 Window:Tag({
     Title = Version:sub(1, 7),
     Icon = "github",
@@ -321,7 +323,7 @@ if supported then
         init(Window, WindUI, path, tab)
     end
 end
-
+init(Window, WindUI, "Universal/Settings.luau")
 queueonteleport(game:HttpGet(
     "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/main.luau"
 ))

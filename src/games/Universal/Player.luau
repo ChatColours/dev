@@ -23,6 +23,7 @@ return function(Window, WindUI)
         Title = "Enable Speed",
         Desc = "Toggle for walkspeed",
         Type = "Checkbox",
+        Flag = "WalkSpeedToggle",
         Value = false, -- default value
         Callback = function(state) 
             SpeedEnabled = state
@@ -37,10 +38,7 @@ return function(Window, WindUI)
     Tab:Slider({
         Title = "WalkSpeed",
         Desc = "How fast you should walk",
-        
-        -- To make float number supported, 
-        -- make the Step a float number.
-        -- example: Step = 0.1
+        Flag = "WalkSpeedSlider",
         Step = 1,
         Value = {
             Min = 20,
@@ -56,6 +54,7 @@ return function(Window, WindUI)
         Title = "Teleport Walk",
         Desc = "Toggle for TP Walk, makes you go faster without changing the humanoid speed",
         Type = "Checkbox",
+        Flag = "TpWalkToggle",
         Value = false, -- default value
         Callback = function(state) 
             if state then
@@ -77,10 +76,7 @@ return function(Window, WindUI)
         Tab:Slider({
         Title = "Teleport Walk Speed",
         Desc = "How fast you should tpwalk",
-        
-        -- To make float number supported, 
-        -- make the Step a float number.
-        -- example: Step = 0.1
+        Flag = "SpeedSlider",
         Step = 1,
         Value = {
             Min = 1,
@@ -96,6 +92,7 @@ return function(Window, WindUI)
         Title = "Enable Jump",
         Desc = "Toggle for jump",
         Type = "Checkbox",
+        Flag = "EnableJump",
         Value = false, -- default value
         Callback = function(state) 
             SpeedEnabled = state
@@ -110,10 +107,7 @@ return function(Window, WindUI)
     Tab:Slider({
         Title = "Jumppower",
         Desc = "How fast you should walk",
-        
-        -- To make float number supported, 
-        -- make the Step a float number.
-        -- example: Step = 0.1
+        Flag = "JumpPowerSlide",
         Step = 1,
         Value = {
             Min = 20,
