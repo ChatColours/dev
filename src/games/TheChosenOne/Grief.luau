@@ -3,7 +3,8 @@ local Globals = Loader.Require("src/games/TheChosenOne/Global.luau")
 
 local RunService = game:GetService("RunService")
 local Player = game.Players.LocalPlayer
-
+local PaintMaterials = false
+local PaintColours = false
 local paintColour = 0
 local blocksInRange = {}
 local BricksPath = workspace:WaitForChild("Bricks")
@@ -152,13 +153,15 @@ return function(Window, WindUI)
                     local Event = Globals.GetEvent(Globals.GetTool("Paint"))
                     if Event then
                         local block = getNearestPart(Range.Paint)
+                        local colour = PaintColours and Color3.fromHSV(math.random(), 1, 1) or block.Color
+                        local material = PaintMaterials and Materials[math.random(1, #Materials)] or block.Material.Name:lower()
                         Event:FireServer(
                             block,
                             Enum.NormalId.Front,
                             Player.Character.HumanoidRootPart.Position,
                             "both \xF0\x9F\xA4\x9D",
-                            Color3.fromHSV(math.random(), 1, 1),
-                            Materials[math.random(1, #Materials)],
+                            colour,
+                            material,
                             ""
                         )
                     end
@@ -166,6 +169,23 @@ return function(Window, WindUI)
             else
                 Connections["PaintAura"]:Disconnect()
             end
+        end
+    })
+
+    Tab:Toggle({
+        Title = "Paint Materials",
+        Desc = "If paint aura should also change materials",
+        Value = false, -- default value
+        Callback = function(state) 
+            PaintMaterials = state
+        end
+    })
+    Tab:Toggle({
+        Title = "Paint Colours",
+        Desc = "If paint aura should also change colours",
+        Value = false, -- default value
+        Callback = function(state) 
+            PaintColours = state
         end
     })
 
