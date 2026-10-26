@@ -66,7 +66,7 @@ return function(Window, WindUI)
         Type = "Input", -- or "Textarea"
         Placeholder = "main",
         Callback = function(input) 
-            saveName = NameJsonFile(input)
+            saveName = input
         end
     })
 
@@ -97,7 +97,9 @@ return function(Window, WindUI)
         Desc = "Load a saved configuration to use",
         Locked = false,
         Callback = function()
-           currConfig:Load()
+            if currConfig then
+                currConfig:Load()
+            end
         end
     })
 
@@ -106,7 +108,8 @@ return function(Window, WindUI)
         Desc = "Delete a saved configuration",
         Locked = false,
         Callback = function()
-           currConfig:Delete()
+            currConfig:Delete()
+            currConfig = nil
             saves:Refresh(_G.ConfigManager:AllConfigs())
         end
     })
