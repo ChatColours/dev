@@ -66,138 +66,242 @@ local Materials = {"smooth", "plastic", "tiles", "planks", "ice", "grass", "sand
                    "concrete", "pavement", "anchor", "collide", "neon", "toxic"}
 
 return function(Window, WindUI)
-
     local Connections = {}
 
     local Tab = Window:Tab({
-    Title = "Grief",
-    Icon = "bomb", -- optional
-    Locked = false,
+        Title = "Grief",
+        Icon = "bomb",
+        Locked = false,
     })
-    
-    Tab:Toggle({
+
+    Tab:Paragraph({
+        Title = "Griefing Utilities",
+        Desc = "Automate block deletion, painting, and construction with configurable ranges and effects.",
+        Icon = "triangle-alert",
+    })
+
+    Tab:Space()
+
+    Tab:Section({
         Title = "Delete Aura",
-        Desc = "delete cubes that are in range",
-        Value = false, -- default value
-        Callback = function(state) 
+        Desc = "Automatically delete nearby cubes.",
+        Icon = "trash-2",
+    })
+
+    Tab:Toggle({
+        Title = "Enable Delete Aura",
+        Desc = "Continuously target and delete the nearest cube within your selected range.",
+        Icon = "trash",
+        Flag = "DelAuraToggle",
+        Type = "Checkbox",
+        Value = false,
+
+        Callback = function(state)
+            if Connections["DelAura"] then
+                Connections["DelAura"]:Disconnect()
+                Connections["DelAura"] = nil
+            end
+
             if state then
                 Connections["DelAura"] = RunService.RenderStepped:Connect(function()
                     local Event = Globals.GetEvent(Globals.GetTool("Delete"))
+
                     if Event then
                         local block = getNearestPart(Range.Delete)
-                        Event:FireServer(block, Globals.GetLocalPosition())
+
+                        if block then
+                            Event:FireServer(block, Globals.GetLocalPosition())
+                        end
                     end
                 end)
-            else
-                Connections["DelAura"]:Disconnect()
             end
         end
     })
 
     Tab:Slider({
-        Title = "Delete Aura Range",
-        Desc = "The range for delete aura",
+        Title = "Deletion Range",
+        Desc = "Maximum distance at which Delete Aura can target cubes.",
+        Flag = "DelAuraRange",
         Step = 1,
         Value = {
             Min = 20,
             Max = 500,
             Default = 70,
         },
+
         Callback = function(value)
             Range.Delete = value
         end
     })
 
-    Tab:Toggle({
+    Tab:Space()
+
+    Tab:Section({
         Title = "Paint Aura",
-        Desc = "rainbow paint cubes in range",
-        Value = false, -- default value
-        Callback = function(state) 
+        Desc = "Automatically recolour and modify nearby cubes.",
+        Icon = "paintbrush",
+    })
+
+    Tab:Toggle({
+        Title = "Enable Paint Aura",
+        Desc = "Continuously paint the nearest cube with your selected effects.",
+        Icon = "palette",
+        Flag = "PaintAuraToggle",
+        Type = "Checkbox",
+        Value = false,
+
+        Callback = function(state)
+            if Connections["PaintAura"] then
+                Connections["PaintAura"]:Disconnect()
+                Connections["PaintAura"] = nil
+            end
+
             if state then
                 Connections["PaintAura"] = RunService.RenderStepped:Connect(function()
-                    
                     local Event = Globals.GetEvent(Globals.GetTool("Paint"))
-                    if Event then
-                        local block = getNearestPart(Range.Paint)
-                        if not block then return end
-                        local colour = PaintColours and Color3.fromHSV(math.random(), 1, 1) or block.Color
-                        local material = PaintMaterials and Materials[math.random(1, #Materials)] or block.Material.Name:lower()
-                        Event:FireServer(
-                            block,
-                            Enum.NormalId.Front,
-                            Globals.GetLocalPosition(),
-                            "both \xF0\x9F\xA4\x9D",
-                            colour,
-                            material,
-                            ""
-                        )
+
+                    if not Event then
+                        return
                     end
+
+                    local block = getNearestPart(Range.Paint)
+
+                    if not block then
+                        return
+                    end
+
+                    local colour = PaintColours
+                        and Color3.fromHSV(math.random(), 1, 1)
+                        or block.Color
+
+                    local material = PaintMaterials
+                        and Materials[math.random(1, #Materials)]
+                        or block.Material.Name:lower()
+
+                    Event:FireServer(
+                        block,
+                        Enum.NormalId.Front,
+                        Globals.GetLocalPosition(),
+                        "both 🤝",
+                        colour,
+                        material,
+                        ""
+                    )
                 end)
-            else
-                Connections["PaintAura"]:Disconnect()
             end
         end
     })
 
+    Tab:Space()
+
     Tab:Toggle({
-        Title = "Paint Materials",
-        Desc = "If paint aura should also change materials",
-        Value = false, -- default value
-        Callback = function(state) 
+        Title = "Randomize Materials",
+        Desc = "Apply randomly selected materials to nearby cubes.",
+        Icon = "layers",
+        Flag = "PaintMaterialsToggle",
+        Type = "Checkbox",
+        Value = false,
+
+        Callback = function(state)
             PaintMaterials = state
         end
     })
+
     Tab:Toggle({
-        Title = "Paint Colours",
-        Desc = "If paint aura should also change colours",
-        Value = false, -- default value
-        Callback = function(state) 
+        Title = "Rainbow Colours",
+        Desc = "Apply randomized rainbow colours to nearby cubes.",
+        Icon = "rainbow",
+        Flag = "PaintColoursToggle",
+        Type = "Checkbox",
+        Value = false,
+
+        Callback = function(state)
             PaintColours = state
         end
     })
 
     Tab:Slider({
-        Title = "Paint Aura Range",
-        Desc = "The range for paint aura",
+        Title = "Painting Range",
+        Desc = "Maximum distance at which Paint Aura can modify cubes.",
+        Flag = "PaintAuraRange",
         Step = 1,
         Value = {
             Min = 20,
             Max = 500,
             Default = 70,
         },
+
         Callback = function(value)
             Range.Paint = value
         end
     })
 
-    Tab:Toggle({
+    Tab:Space()
+
+    Tab:Section({
         Title = "Build Aura",
-        Desc = "build cubes in range",
-        Value = false, -- default value
-        Callback = function(state) 
+        Desc = "Automatically construct blocks around your character.",
+        Icon = "blocks",
+    })
+
+    Tab:Toggle({
+        Title = "Enable Build Aura",
+        Desc = "Continuously place cubes at random positions around your character.",
+        Icon = "hammer",
+        Flag = "BuildAuraToggle",
+        Type = "Checkbox",
+        Value = false,
+
+        Callback = function(state)
+            if Connections["BuildAura"] then
+                Connections["BuildAura"]:Disconnect()
+                Connections["BuildAura"] = nil
+            end
+
             if state then
                 Connections["BuildAura"] = RunService.RenderStepped:Connect(function()
                     local Event = Globals.GetEvent(Globals.GetTool("Build"))
+
                     if Event then
-                        Event:FireServer(workspace.Terrain, Enum.NormalId.Top, getPositionAround(Player.Character.HumanoidRootPart, 5, Range.Build), "normal")
+                        Event:FireServer(
+                            workspace.Terrain,
+                            Enum.NormalId.Top,
+                            getPositionAround(
+                                Player.Character.HumanoidRootPart,
+                                5,
+                                Range.Build
+                            ),
+                            "normal"
+                        )
                     end
                 end)
-            else
-                Connections["BuildAura"]:Disconnect()
             end
         end
     })
+
     Tab:Slider({
-        Title = "Build Aura Range",
-        Desc = "The range for build aura",
+        Title = "Building Range",
+        Desc = "Maximum distance around your character for automatic block placement.",
+        Flag = "BuildAuraRange",
         Step = 1,
         Value = {
             Min = 5,
             Max = 24,
             Default = 24,
         },
+
         Callback = function(value)
             Range.Build = value
         end
     })
+
+    Tab:Space()
+
+    Tab:Paragraph({
+        Title = "Aura Information",
+        Desc = "Aura features operate continuously while enabled. Higher ranges expand the area of effect. Disable unused features to reduce unnecessary processing.",
+        Icon = "info",
+    })
+
+    return Tab
 end
