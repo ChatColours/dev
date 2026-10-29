@@ -1809,7 +1809,7 @@ game:GetService("Players").LocalPlayer:WaitForChild("Backpack"):WaitForChild("Pa
 				local paintArgs = {
 					block,
 					Enum.NormalId.Top,
-					hrp.Position,
+					block.Position,
 					"both \240\159\164\157",
 					col,
 					"plastic",
@@ -1862,11 +1862,11 @@ game:GetService("Players").LocalPlayer:WaitForChild("Backpack"):WaitForChild("Pa
 				deleteEvent:FireServer(result.Instance, plr.Character:FindFirstChild("HumanoidRootPart").Position)
 			end
 
-		elseif rainbow then
+		elseif rainbow and mouse.Target then
 			event:FireServer(
-				result and result.Instance or game.Workspace.Beach,
-				normalToFace(result and result.Position or Vector3.new(0,1,0)),
-				vector.create(hitPos.X, hitPos.Y, hitPos.Z),
+				mouse.Target,
+				normalToFace(mouse.Target.Position or Vector3.new(0,1,0)),
+				hrp.Position,
 				mode,
 				col,
 				currentMaterial,
