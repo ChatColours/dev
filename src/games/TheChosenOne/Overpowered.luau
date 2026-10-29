@@ -15,7 +15,7 @@ UserInputService.InputBegan:Connect(function(key: InputObject, gp: boolean)
     if gp then return end
 
     if key.KeyCode == MousePaintKey and MousePaintUseKeybind and MousePaintToggle then
-        MousePaintToggle:Set(true)
+        MousePaintToggle:Set(not MousePaint)
     end
 end)
 

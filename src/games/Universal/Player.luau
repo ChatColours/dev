@@ -12,21 +12,37 @@ local OgJump = 50
 local tpWalkSpeed = 10
 local SpeedEnabled, JumpEnabled = false, false
 local tpwalk
+
 return function(Window, WindUI)
     local Tab = Window:Tab({
         Title = "LocalPlayer",
-        Icon = "user", -- optional
+        Icon = "user-round",
         Locked = false,
     })
 
+    Tab:Paragraph({
+        Title = "LocalPlayer Settings",
+        Desc = "Customize your character's movement, walking speed, teleport movement, and jumping abilities.",
+        Icon = "settings-2",
+    })
+
+    Tab:Space()
+
+    Tab:Section({
+        Title = "WalkSpeed",
+        Desc = "Manage your character's movement speed.",
+        Icon = "footprints",
+    })
+
     Tab:Toggle({
-        Title = "Enable Speed",
-        Desc = "Toggle for walkspeed",
+        Title = "Enable WalkSpeed",
+        Desc = "Override your character's default walking speed.",
         Type = "Checkbox",
         Flag = "WalkSpeedToggle",
-        Value = false, -- default value
-        Callback = function(state) 
+        Value = false,
+        Callback = function(state)
             SpeedEnabled = state
+
             if state then
                 OgSpeed = humanoid.WalkSpeed
             else
@@ -37,11 +53,11 @@ return function(Window, WindUI)
 
     Tab:Slider({
         Title = "WalkSpeed",
-        Desc = "How fast you should walk",
+        Desc = "Adjust how fast your character walks.",
         Flag = "WalkSpeedSlider",
         Step = 1,
         Value = {
-            Min = 20,
+            Min = 1,
             Max = 500,
             Default = 16,
         },
@@ -50,16 +66,30 @@ return function(Window, WindUI)
         end
     })
 
+    Tab:Space()
+
+    Tab:Section({
+        Title = "Teleport Movement",
+        Desc = "Move faster without modifying Humanoid.WalkSpeed.",
+        Icon = "zap",
+    })
+
     Tab:Toggle({
         Title = "Teleport Walk",
-        Desc = "Toggle for TP Walk, makes you go faster without changing the humanoid speed",
+        Desc = "Move your character using small position adjustments.",
         Type = "Checkbox",
         Flag = "TpWalkToggle",
-        Value = false, -- default value
-        Callback = function(state) 
+        Value = false,
+        Callback = function(state)
+            if tpwalk then
+                tpwalk:Disconnect()
+                tpwalk = nil
+            end
+
             if state then
                 tpwalk = RunService.Heartbeat:Connect(function(dt: number)
                     local direction = humanoid.MoveDirection
+
                     if direction.Magnitude < 0.001 then
                         return
                     end
@@ -67,15 +97,13 @@ return function(Window, WindUI)
                     local displace = direction.Unit * tpWalkSpeed * dt
                     character:PivotTo(character:GetPivot() + displace)
                 end)
-            else
-                tpwalk:Disconnect()
             end
         end
     })
 
-        Tab:Slider({
+    Tab:Slider({
         Title = "Teleport Walk Speed",
-        Desc = "How fast you should tpwalk",
+        Desc = "Control the additional movement speed in studs per second.",
         Flag = "SpeedSlider",
         Step = 1,
         Value = {
@@ -88,14 +116,23 @@ return function(Window, WindUI)
         end
     })
 
-        Tab:Toggle({
-        Title = "Enable Jump",
-        Desc = "Toggle for jump",
+    Tab:Space()
+
+    Tab:Section({
+        Title = "Jump Settings",
+        Desc = "Customize your character's jumping power.",
+        Icon = "arrow-up-from-line",
+    })
+
+    Tab:Toggle({
+        Title = "Enable JumpPower",
+        Desc = "Override your character's default jumping power.",
         Type = "Checkbox",
         Flag = "EnableJump",
-        Value = false, -- default value
-        Callback = function(state) 
-            SpeedEnabled = state
+        Value = false,
+        Callback = function(state)
+            JumpEnabled = state
+
             if state then
                 OgJump = humanoid.JumpPower
             else
@@ -105,8 +142,8 @@ return function(Window, WindUI)
     })
 
     Tab:Slider({
-        Title = "Jumppower",
-        Desc = "How fast you should walk",
+        Title = "JumpPower",
+        Desc = "Adjust how high your character can jump.",
         Flag = "JumpPowerSlide",
         Step = 1,
         Value = {
@@ -119,6 +156,14 @@ return function(Window, WindUI)
         end
     })
 
+    Tab:Space()
+
+    Tab:Paragraph({
+        Title = "Movement Information",
+        Desc = "WalkSpeed changes your Humanoid's movement speed. Teleport Walk moves your character directly, while JumpPower controls jumping strength.",
+        Icon = "info",
+    })
+
     RunService.RenderStepped:Connect(function()
         if humanoid and SpeedEnabled then
             humanoid.WalkSpeed = Speed
@@ -128,4 +173,6 @@ return function(Window, WindUI)
             humanoid.JumpPower = JumpPower
         end
     end)
+
+    return Tab
 end

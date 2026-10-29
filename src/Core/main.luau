@@ -254,7 +254,7 @@ SteveHub supports various executors, although certain advanced functions and byp
 Some features may be unavailable depending on your executor's supported functions.
 
 <font size="17" color="#C6A47D"><b>Open-Source Development</b></font>
-SteveHub is built with modularity and transparency in mind. Our publicly available code and assets may be studied, modified, and reused.
+SteveHub is built with modularity and transparency in mind. SteveHub uses the MIT license, our publicly available code and assets may be studied, modified, and reused. When reusing code from SteveHub, credits must be given as said in the license.
 
 Contributions, suggestions, and bug reports are always appreciated as we continue improving the project.
 
