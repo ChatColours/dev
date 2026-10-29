@@ -51,4 +51,11 @@ function Globals.GetEvent(tool : Tool): RemoteEvent?
     end
 end
 
+function Globals.GetLocalPosition(): Vector3
+    local Root = Character:WaitForChild("HumanoidRootPart")
+    if Root then
+        return Root.Position
+    end
+end
+
 return Globals

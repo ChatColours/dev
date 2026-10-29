@@ -28,7 +28,7 @@ RunService.RenderStepped:Connect(function(dt: number)
         event:FireServer(
             Mouse.Target,
             Enum.NormalId.Front,
-            Mouse.Target.Position,
+            Globals.GetLocalPosition(),
             "both \xF0\x9F\xA4\x9D",
             colour,
             material,

@@ -85,7 +85,7 @@ return function(Window, WindUI)
                     local Event = Globals.GetEvent(Globals.GetTool("Delete"))
                     if Event then
                         local block = getNearestPart(Range.Delete)
-                        Event:FireServer(block, Player.Character.HumanoidRootPart.Position)
+                        Event:FireServer(block, Globals.GetLocalPosition())
                     end
                 end)
             else
@@ -125,7 +125,7 @@ return function(Window, WindUI)
                         Event:FireServer(
                             block,
                             Enum.NormalId.Front,
-                            Player.Character.HumanoidRootPart.Position,
+                            Globals.GetLocalPosition(),
                             "both \xF0\x9F\xA4\x9D",
                             colour,
                             material,
