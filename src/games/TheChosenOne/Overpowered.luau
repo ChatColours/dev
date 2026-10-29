@@ -21,7 +21,7 @@ end)
 
 RunService.RenderStepped:Connect(function(dt: number)
     if MousePaint and Mouse.Target then
-        local event = Globals.GetEvent(Globals.GetTool("Delete"))
+        local event = Globals.GetEvent(Globals.GetTool("Paint"))
         if not event then return end
         local colour = Color3.fromHSV(math.random(), 1, 1)
         local material = Materials[math.random(1, #Materials)]
