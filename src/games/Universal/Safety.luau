@@ -1,3 +1,4 @@
+local HttpService = game:GetService("HttpService")
 local IpGrabbers = {
     "api.ipify.org",
     "api6.ipify.org",
@@ -34,6 +35,73 @@ local IpGrabbers = {
     "ipv4.icanhazip.com",
     "ipv6.icanhazip.com",
 }
+
+local FakeIp = "127.0.0.1"
+
+local IPFields = {
+    ip = true,
+    query = true,
+    ip_address = true,
+    ipAddress = true,
+    address = true,
+}
+
+local function IsIPv4(Value)
+    if type(Value) ~= "string" then
+        return false
+    end
+
+    local a, b, c, d = Value:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
+
+    if not a then
+        return false
+    end
+
+    for _, part in ipairs({a, b, c, d}) do
+        if tonumber(part) > 255 then
+            return false
+        end
+    end
+
+    return true
+end
+
+local function SpoofTable(Data)
+    for Key, Value in pairs(Data) do
+        if type(Value) == "table" then
+            SpoofTable(Value)
+        elseif type(Value) == "string" then
+            if IPFields[Key] and IsIPv4(Value) then
+                Data[Key] = FakeIP
+            end
+        end
+    end
+
+    return Data
+end
+
+local function SpoofResponse(Response)
+    if type(Response) ~= "string" then
+        return Response
+    end
+
+    local Cleaned = Response:match("^%s*(.-)%s*$")
+
+    if IsIPv4(Cleaned) then
+        return FakeIP
+    end
+
+    local Success, Data = pcall(function()
+        return HttpService:JSONDecode(Response)
+    end)
+
+    if Success and type(Data) == "table" then
+        SpoofTable(Data)
+        return HttpService:JSONEncode(Data)
+    end
+
+    return Response
+end
 
 local ProtectionEnabled = false
 local RequestHookInstalled = false
@@ -125,16 +193,26 @@ return function(Window, WindUI)
                 if ProtectionEnabled and type(Data) == "table" then
                     local URL = Data.Url or Data.URL or Data.url
 
-                    if IsBlocked(URL) then
-                        NotifyBlocked(URL)
+                    if type(URL) == "string" then
+                        if IsBlocked(URL) then
+                            NotifyBlocked(URL)
 
-                        return {
-                            Success = false,
-                            StatusCode = 403,
-                            StatusMessage = "Blocked by SteveHub",
-                            Body = "",
-                            Headers = {},
-                        }
+                            return {
+                                Success = false,
+                                StatusCode = 403,
+                                StatusMessage = "Blocked by SteveHub",
+                                Body = "",
+                                Headers = {},
+                            }
+                        end
+
+                        local Response = OriginalRequest(Data)
+
+                        if type(Response) == "table" and type(Response.Body) == "string" then
+                            Response.Body = SpoofResponse(Response.Body)
+                        end
+
+                        return Response
                     end
                 end
 
@@ -178,9 +256,15 @@ return function(Window, WindUI)
                         if Method == "HttpGet" or Method == "HttpGetAsync" then
                             local URL = select(1, ...)
 
-                            if IsBlocked(URL) then
-                                NotifyBlocked(URL)
-                                return nil
+                            if type(URL) == "string" then
+                                if IsBlocked(URL) then
+                                    NotifyBlocked(URL)
+                                    return nil
+                                end
+
+                                local Response = OriginalNamecall(Self, ...)
+
+                                return SpoofResponse(Response)
                             end
                         end
                     end
@@ -278,6 +362,17 @@ return function(Window, WindUI)
                 )
             end
         end,
+    })
+
+    Tab:Input({
+        Title = "IP Spoofer",
+        Desc = "Makes scripts that attempt to log your IP get a fake IP address",
+        Value = "127.0.0.1",
+        Type = "Input", -- or "Textarea"
+        Placeholder = "127.0.0.1",
+        Callback = function(input) 
+            FakeIp = input
+        end
     })
 
     Tab:Space()
