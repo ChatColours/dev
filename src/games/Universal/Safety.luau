@@ -1,4 +1,5 @@
 local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
 local IpGrabbers = {
     "api.ipify.org", "api6.ipify.org", "api64.ipify.org", "ipwho.is",
     "ipinfo.io", "ipapi.co", "ip-api.com", "api.ipapi.is",
@@ -10,6 +11,7 @@ local IpGrabbers = {
     "ipregistry.co", "ip2location.io", "ip.guide", "ip.sb",
     "ip4.me", "ip6.me", "ipv4.icanhazip.com", "ipv6.icanhazip.com",
 }
+local LocalPlayer = Players.LocalPlayer
 local FakeIp = "127.0.0.1"
 local ProtectionEnabled = false
 local RequestHookInstalled = false
@@ -214,7 +216,7 @@ return function(Window, WindUI)
         end
         local Success, Result = pcall(function()
             return hookmetamethod(game.Players.LocalPlayer, "__index", newcclosure(function(Self, Key)
-                if Self == game.Players.LocalPlayer then
+                if Self == LocalPlayer then
                     local Entry
                     if Key == "UserId" then
                         Entry = Spoofers.USERID
