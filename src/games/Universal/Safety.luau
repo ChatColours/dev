@@ -1,151 +1,149 @@
 local HttpService = game:GetService("HttpService")
+
 local IpGrabbers = {
-    "api.ipify.org",
-    "api6.ipify.org",
-    "api64.ipify.org",
-    "ipwho.is",
-    "ipinfo.io",
-    "ipapi.co",
-    "ip-api.com",
-    "api.ipapi.is",
-    "api.ipgeolocation.io",
-    "api.iplocation.net",
-    "ip.oxylabs.io",
-    "icanhazip.com",
-    "ifconfig.me",
-    "ifconfig.co",
-    "ifconfig.io",
-    "ident.me",
-    "checkip.amazonaws.com",
-    "myexternalip.com",
-    "wtfismyip.com",
-    "ip.tyk.nu",
-    "ipecho.net",
-    "api.myip.com",
-    "ip-address-api.com",
-    "ipapi.com",
-    "ipdata.co",
-    "ipstack.com",
-    "ipregistry.co",
-    "ip2location.io",
-    "ip.guide",
-    "ip.sb",
-    "ip4.me",
-    "ip6.me",
-    "ipv4.icanhazip.com",
-    "ipv6.icanhazip.com",
+    "api.ipify.org", "api6.ipify.org", "api64.ipify.org", "ipwho.is",
+    "ipinfo.io", "ipapi.co", "ip-api.com", "api.ipapi.is",
+    "api.ipgeolocation.io", "api.iplocation.net", "ip.oxylabs.io",
+    "icanhazip.com", "ifconfig.me", "ifconfig.co", "ifconfig.io",
+    "ident.me", "checkip.amazonaws.com", "myexternalip.com",
+    "wtfismyip.com", "ip.tyk.nu", "ipecho.net", "api.myip.com",
+    "ip-address-api.com", "ipapi.com", "ipdata.co", "ipstack.com",
+    "ipregistry.co", "ip2location.io", "ip.guide", "ip.sb",
+    "ip4.me", "ip6.me", "ipv4.icanhazip.com", "ipv6.icanhazip.com",
 }
 
 local FakeIp = "127.0.0.1"
-
-local IPFields = {
-    ip = true,
-    query = true,
-    ip_address = true,
-    ipAddress = true,
-    address = true,
-}
-
-local function IsIPv4(Value)
-    if type(Value) ~= "string" then
-        return false
-    end
-
-    local a, b, c, d = Value:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
-
-    if not a then
-        return false
-    end
-
-    for _, part in ipairs({a, b, c, d}) do
-        if tonumber(part) > 255 then
-            return false
-        end
-    end
-
-    return true
-end
-
-local function SpoofTable(Data)
-    for Key, Value in pairs(Data) do
-        if type(Value) == "table" then
-            SpoofTable(Value)
-        elseif type(Value) == "string" then
-            if IPFields[Key] and IsIPv4(Value) then
-                Data[Key] = FakeIP
-            end
-        end
-    end
-
-    return Data
-end
-
-local function SpoofResponse(Response)
-    if type(Response) ~= "string" then
-        return Response
-    end
-
-    local Cleaned = Response:match("^%s*(.-)%s*$")
-
-    if IsIPv4(Cleaned) then
-        return FakeIP
-    end
-
-    local Success, Data = pcall(function()
-        return HttpService:JSONDecode(Response)
-    end)
-
-    if Success and type(Data) == "table" then
-        SpoofTable(Data)
-        return HttpService:JSONEncode(Data)
-    end
-
-    return Response
-end
-
 local ProtectionEnabled = false
 local RequestHookInstalled = false
 local NamecallHookInstalled = false
-
 local OriginalRequest
 local OriginalNamecall
+local SpoofedRequests = 0
+local RejectedRequests = 0
+local LastInterceptedURL = "None"
 
-local BlockedRequests = 0
-local LastBlockedURL = "None"
+local function IsIPv4(Value)
+    if type(Value) ~= "string" then return false end
+    local a, b, c, d = Value:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
+    if not a then return false end
+    for _, Part in ipairs({a, b, c, d}) do
+        if #Part > 3 or tonumber(Part) > 255 then return false end
+    end
+    return true
+end
 
 local function GetHost(URL)
-    if type(URL) ~= "string" then
-        return nil
-    end
-
+    if type(URL) ~= "string" then return nil end
     local Host = URL:match("^https?://([^/%?#]+)")
-
-    if not Host then
-        return nil
-    end
-
-    Host = Host:lower()
-    Host = Host:gsub(":%d+$", "")
-    Host = Host:gsub("%.$", "")
-
-    return Host
+    if not Host then return nil end
+    return Host:lower():gsub(":%d+$", ""):gsub("%.$", "")
 end
 
 local function IsBlocked(URL)
     local Host = GetHost(URL)
-
-    if not Host then
-        return false
-    end
-
+    if not Host then return false end
     for _, BlockedHost in ipairs(IpGrabbers) do
-        if Host == BlockedHost
-            or Host:sub(-#BlockedHost - 1) == "." .. BlockedHost then
+        if Host == BlockedHost or Host:sub(-#BlockedHost - 1) == "." .. BlockedHost then
             return true
         end
     end
-
     return false
+end
+
+local function HostMatches(Host, Domain)
+    return Host == Domain or Host:sub(-#Domain - 1) == "." .. Domain
+end
+
+local function ToJSON(Data)
+    local OK, Result = pcall(HttpService.JSONEncode, HttpService, Data)
+    return OK and Result or nil
+end
+
+local function SpoofBlockedRequest(URL)
+    local Host = GetHost(URL)
+    if not Host or not IsIPv4(FakeIp) then return nil end
+    local LowerURL = URL:lower()
+
+    if Host == "api6.ipify.org" or Host == "ipv6.icanhazip.com" or Host == "ip6.me" then
+        return nil
+    end
+
+    if HostMatches(Host, "ipify.org") then
+        if LowerURL:find("format=json", 1, true) then
+            return ToJSON({ip = FakeIp})
+        end
+        return FakeIp
+    end
+
+    if Host == "ipwho.is" then
+        return ToJSON({
+            ip = FakeIp, success = true, type = "IPv4", continent = "North America",
+            continent_code = "NA", country = "United States", country_code = "US",
+            region = "Example Region", city = "Example City", latitude = 0,
+            longitude = 0, connection = {isp = "Example ISP", org = "Example Network"},
+        })
+    end
+
+    if Host == "ipinfo.io" then
+        return ToJSON({
+            ip = FakeIp, city = "Example City", region = "Example Region",
+            country = "US", loc = "0,0", org = "AS64500 Example Network",
+            timezone = "Etc/UTC",
+        })
+    end
+
+    if Host == "ipapi.co" then
+        if LowerURL:find("/json", 1, true) then
+            return ToJSON({
+                ip = FakeIp, city = "Example City", region = "Example Region",
+                country = "US", country_name = "United States",
+                latitude = 0, longitude = 0, org = "Example Network",
+            })
+        end
+        if LowerURL:match("/ip/?%??") then return FakeIp end
+        return nil
+    end
+
+    if Host == "ip-api.com" then
+        return ToJSON({
+            status = "success", query = FakeIp, country = "United States",
+            countryCode = "US", regionName = "Example Region", city = "Example City",
+            lat = 0, lon = 0, isp = "Example ISP", org = "Example Network",
+        })
+    end
+
+    if Host == "api.myip.com" then
+        return ToJSON({ip = FakeIp, country = "United States", cc = "US"})
+    end
+
+    if Host == "ifconfig.co" then
+        if LowerURL:find("/json", 1, true) then
+            return ToJSON({ip = FakeIp, country = "United States", country_iso = "US"})
+        end
+        return FakeIp
+    end
+
+    if Host == "ip.sb" then
+        if LowerURL:find("/geoip", 1, true) then
+            return ToJSON({ip = FakeIp, country = "United States", country_code = "US"})
+        end
+        return FakeIp
+    end
+
+    local PlainTextHosts = {
+        ["icanhazip.com"] = true, ["ipv4.icanhazip.com"] = true,
+        ["ipv6.icanhazip.com"] = true, ["ifconfig.me"] = true,
+        ["ifconfig.io"] = true, ["ident.me"] = true,
+        ["checkip.amazonaws.com"] = true, ["myexternalip.com"] = true,
+        ["wtfismyip.com"] = true, ["ip.tyk.nu"] = true,
+        ["ipecho.net"] = true, ["ip4.me"] = true,
+    }
+    if PlainTextHosts[Host] then
+        return FakeIp .. ((Host == "icanhazip.com" or Host == "checkip.amazonaws.com") and "\n" or "")
+    end
+
+    -- Unsupported / unknown response shapes: fail closed without sending a request.
+    return nil
 end
 
 return function(Window, WindUI)
@@ -164,294 +162,264 @@ return function(Window, WindUI)
         })
     end
 
-    local function NotifyBlocked(URL)
-        BlockedRequests += 1
-        LastBlockedURL = URL
-
+    local function Intercept(URL, Spoofed)
+        LastInterceptedURL = URL
+        if Spoofed then
+            SpoofedRequests += 1
+        else
+            RejectedRequests += 1
+        end
         Notify(
-            "IP Grabber Detection",
-            "SteveHub blocked a request to: " .. URL,
-            "shield-alert"
+            Spoofed and "IP Response Spoofed" or "IP Request Rejected",
+            (Spoofed and "Returned fake data for: " or "Blocked unsupported API: ") .. URL,
+            Spoofed and "shield-check" or "shield-alert"
         )
     end
 
     local function InstallRequestHook()
-        if RequestHookInstalled then
-            return true
-        end
-
-        if type(hookfunction) ~= "function" then
-            return false, "hookfunction is unavailable."
-        end
-
-        if type(request) ~= "function" then
-            return false, "request is unavailable."
+        if RequestHookInstalled then return true end
+        if type(hookfunction) ~= "function" or type(request) ~= "function" then
+            return false, "request() hooking is unavailable."
         end
 
         local Success, Result = pcall(function()
             return hookfunction(request, function(Data)
                 if ProtectionEnabled and type(Data) == "table" then
                     local URL = Data.Url or Data.URL or Data.url
-
-                    if type(URL) == "string" then
-                        if IsBlocked(URL) then
-                            NotifyBlocked(URL)
-
-                            return {
-                                Success = false,
-                                StatusCode = 403,
-                                StatusMessage = "Blocked by SteveHub",
-                                Body = "",
-                                Headers = {},
-                            }
-                        end
-
-                        local Response = OriginalRequest(Data)
-
-                        if type(Response) == "table" and type(Response.Body) == "string" then
-                            Response.Body = SpoofResponse(Response.Body)
-                        end
-
-                        return Response
+                    if type(URL) == "string" and IsBlocked(URL) then
+                        local Body = SpoofBlockedRequest(URL)
+                        Intercept(URL, Body ~= nil)
+                        if not Body then return nil end
+                        return {
+                            Success = true,
+                            StatusCode = 200,
+                            StatusMessage = "OK",
+                            Body = Body,
+                            Headers = {
+                                ["Content-Type"] = Body:sub(1, 1) == "{"
+                                    and "application/json" or "text/plain",
+                            },
+                        }
                     end
                 end
-
                 return OriginalRequest(Data)
             end)
         end)
 
-        if not Success then
-            return false, tostring(Result)
-        end
-
-        if type(Result) ~= "function" then
-            return false, "hookfunction returned an invalid original function."
-        end
-
+        if not Success then return false, tostring(Result) end
+        if type(Result) ~= "function" then return false, "Invalid original request()." end
         OriginalRequest = Result
         RequestHookInstalled = true
-
         return true
     end
 
     local function InstallNamecallHook()
-        if NamecallHookInstalled then
-            return true
-        end
-
+        if NamecallHookInstalled then return true end
         if type(hookmetamethod) ~= "function"
             or type(newcclosure) ~= "function"
             or type(getnamecallmethod) ~= "function" then
-            return false, "Required namecall hooking functions are unavailable."
+            return false, "Namecall hooking is unavailable."
         end
 
         local Success, Result = pcall(function()
-            return hookmetamethod(
-                game,
-                "__namecall",
-                newcclosure(function(Self, ...)
-                    if ProtectionEnabled then
-                        local Method = getnamecallmethod()
-
-                        if Method == "HttpGet" or Method == "HttpGetAsync" then
-                            local URL = select(1, ...)
-
-                            if type(URL) == "string" then
-                                if IsBlocked(URL) then
-                                    NotifyBlocked(URL)
-                                    return nil
-                                end
-
-                                local Response = OriginalNamecall(Self, ...)
-
-                                return SpoofResponse(Response)
-                            end
+            return hookmetamethod(game, "__namecall", newcclosure(function(Self, ...)
+                if ProtectionEnabled then
+                    local Method = getnamecallmethod()
+                    if Method == "HttpGet" or Method == "HttpGetAsync" then
+                        local URL = select(1, ...)
+                        if type(URL) == "string" and IsBlocked(URL) then
+                            local Body = SpoofBlockedRequest(URL)
+                            Intercept(URL, Body ~= nil)
+                            return Body
                         end
                     end
-
-                    return OriginalNamecall(Self, ...)
-                end)
-            )
+                end
+                return OriginalNamecall(Self, ...)
+            end))
         end)
 
-        if not Success then
-            return false, tostring(Result)
-        end
-
-        if type(Result) ~= "function" then
-            return false, "hookmetamethod returned an invalid original function."
-        end
-
+        if not Success then return false, tostring(Result) end
+        if type(Result) ~= "function" then return false, "Invalid original namecall." end
         OriginalNamecall = Result
         NamecallHookInstalled = true
-
         return true
     end
 
     local function InstallHooks()
-        local RequestSuccess, RequestError = InstallRequestHook()
-        local NamecallSuccess, NamecallError = InstallNamecallHook()
-
-        if not RequestSuccess and not NamecallSuccess then
+        local RequestOK, RequestError = InstallRequestHook()
+        local NamecallOK, NamecallError = InstallNamecallHook()
+        if not RequestOK and not NamecallOK then
             return false, tostring(RequestError) .. " " .. tostring(NamecallError)
         end
-
-        return true, RequestSuccess, NamecallSuccess
+        return true, RequestOK, NamecallOK
     end
 
     Tab:Paragraph({
         Title = "Your Privacy Matters",
-        Desc = "<b>SteveHub cares about your safety and privacy.</b>\n\nWe believe users deserve transparency and greater control over their scripting experience.\n\nOur protection system is designed to identify and block HTTP requests to known IP lookup and geolocation services.",
-        Icon = "heart-handshake",
+        Desc = [[
+<font size="22" color="#D9B78C"><b>SteveHub Privacy Protection</b></font>
+
+<font color="#E0D5C5">Your privacy matters.</font> This feature attempts to intercept HTTP requests to known IP lookup and geolocation services before they are sent.
+
+<font size="17" color="#C6A47D"><b>How Protection Works</b></font>
+<font color="#A6C48A">✓</font> Recognised IP APIs receive a fabricated response.
+<font color="#A6C48A">✓</font> Unsupported blocked API formats return nil.
+<font color="#A6C48A">✓</font> Matching requests are not forwarded through the intercepted API.
+
+<font color="#A99B8A"><i>Response spoofing does not alter the IP seen by a server if a request is actually sent.</i></font>
+]],
+        Color = Color3.fromHex("#3B3027"),
+        Image = "", ImageSize = 30, Thumbnail = "", ThumbnailSize = 80,
+        Locked = false, Buttons = {},
     })
 
     Tab:Space()
-
     Tab:Section({
         Title = "Network Protection",
-        Desc = "Protect against requests to known IP-related services.",
+        Desc = "Intercept known IP lookup endpoints.",
         Icon = "shield",
     })
 
     Tab:Toggle({
         Title = "Enable IP Protection",
-        Desc = "Filter supported HTTP requests to known IP lookup services.",
+        Desc = "Spoof supported IP APIs and reject unsupported matches.",
         Icon = "shield-check",
         Flag = "SteveHubIPProtection",
         Type = "Checkbox",
         Value = false,
-
         Callback = function(State)
             if State then
-                local Success, ResultA, ResultB = InstallHooks()
-
+                local Success, RequestOK, NamecallOK = InstallHooks()
                 if not Success then
                     ProtectionEnabled = false
-
-                    Notify(
-                        "Protection Unavailable",
-                        tostring(ResultA),
-                        "triangle-alert"
-                    )
-
+                    Notify("Protection Unavailable", tostring(RequestOK), "triangle-alert")
                     return
                 end
-
                 ProtectionEnabled = true
-
-                if ResultA and ResultB then
-                    Notify(
-                        "Protection Enabled",
-                        "SteveHub is now filtering supported request() and HttpGet calls.",
-                        "shield-check"
-                    )
-                else
-                    Notify(
-                        "Partial Protection Enabled",
-                        "Some HTTP interfaces could not be hooked. Protection is limited.",
-                        "shield-alert"
-                    )
-                end
+                Notify(
+                    RequestOK and NamecallOK and "Protection Enabled" or "Partial Protection",
+                    RequestOK and NamecallOK
+                        and "Filtering supported request() and HttpGet calls."
+                        or "One of the supported HTTP interfaces could not be hooked.",
+                    "shield-check"
+                )
             else
                 ProtectionEnabled = false
-
-                Notify(
-                    "Protection Disabled",
-                    "SteveHub is no longer filtering HTTP requests.",
-                    "shield-off"
-                )
+                Notify("Protection Disabled", "HTTP filtering is disabled.", "shield-off")
             end
         end,
     })
 
     Tab:Input({
-        Title = "IP Spoofer",
-        Desc = "Makes scripts that attempt to log your IP get a fake IP address",
-        Value = "127.0.0.1",
-        Type = "Input", -- or "Textarea"
+        Title = "Fake IP Address",
+        Desc = "IPv4 value returned to supported blocked API requests.",
+        Value = FakeIp,
+        Type = "Input",
         InputIcon = "pen",
         Placeholder = "127.0.0.1",
-        Callback = function(input) 
-            FakeIp = input
-        end
+        Callback = function(Input)
+            if IsIPv4(Input) then
+                FakeIp = Input
+            else
+                Notify("Invalid IPv4", "Enter a valid IPv4 address (0-255 per octet).", "triangle-alert")
+            end
+        end,
     })
 
     Tab:Space()
-
     Tab:Section({
         Title = "Protection Information",
-        Desc = "Details about the current protection system.",
+        Desc = "About detection and response handling.",
         Icon = "list-check",
     })
 
     Tab:Paragraph({
         Title = "Known IP Services",
-        Desc = string.format(
-            "SteveHub currently checks requests against %d known IP-related domains.\n\nThis includes IP lookup, IP identification, and geolocation services.",
-            #IpGrabbers
-        ),
-        Icon = "globe-lock",
+        Desc = string.format([[
+<font size="20" color="#D9B78C"><b>Monitored Endpoints</b></font>
+
+<font color="#E0D5C5">SteveHub currently checks against <b>%d known domains</b>.</font>
+
+<font size="17" color="#C6A47D"><b>Examples</b></font>
+<font color="#CFC5B8">• ipify.org and its API subdomains
+• ipwho.is
+• ipinfo.io
+• ip-api.com
+• ifconfig.me and icanhazip.com</font>
+
+<font color="#A99B8A"><i>Not every monitored endpoint has a supported spoofed response format.</i></font>
+]], #IpGrabbers),
+        Color = Color3.fromHex("#3B3027"),
+        Image = "", ImageSize = 30, Thumbnail = "", ThumbnailSize = 80,
+        Locked = false, Buttons = {},
     })
 
     Tab:Paragraph({
-        Title = "Request Filtering",
-        Desc = "Supported request() and HttpGet / HttpGetAsync calls are checked locally.\n\nMatching requests are rejected while protection is enabled.",
-        Icon = "network",
+        Title = "Request Handling",
+        Desc = [[
+<font size="20" color="#D9B78C"><b>Response Handling</b></font>
+
+<font color="#CFC5B8">• <b>Recognised service:</b> return fake IP data without contacting it.
+• <b>Unknown response format:</b> return nil without contacting it.
+• <b>Unmatched domain:</b> allow the request normally.</font>
+
+<font color="#A99B8A"><i>Only supported request() and game:HttpGet / HttpGetAsync paths are intercepted.</i></font>
+]],
+        Color = Color3.fromHex("#3B3027"),
+        Image = "", ImageSize = 30, Thumbnail = "", ThumbnailSize = 80,
+        Locked = false, Buttons = {},
     })
 
     Tab:Space()
-
     Tab:Button({
         Title = "View Protection Statistics",
-        Desc = "Display the number of HTTP requests blocked during this session.",
+        Desc = "View spoofed and rejected requests from this session.",
         Icon = "chart-no-axes-column",
         Callback = function()
-            Notify(
-                "Protection Statistics",
-                string.format(
-                    "Blocked requests: %d\nLast blocked URL: %s",
-                    BlockedRequests,
-                    LastBlockedURL
-                ),
-                "activity"
-            )
+            Notify("Protection Statistics", string.format(
+                "Spoofed: %d | Rejected: %d\nLast intercepted URL: %s",
+                SpoofedRequests, RejectedRequests, LastInterceptedURL
+            ), "activity")
         end,
     })
 
     Tab:Button({
         Title = "Reset Protection Statistics",
-        Desc = "Clear the blocked request counter.",
+        Desc = "Clear the intercepted request counters.",
         Icon = "refresh-cw",
         Callback = function()
-            BlockedRequests = 0
-            LastBlockedURL = "None"
-
-            Notify(
-                "Statistics Reset",
-                "Protection statistics have been cleared.",
-                "check"
-            )
+            SpoofedRequests = 0
+            RejectedRequests = 0
+            LastInterceptedURL = "None"
+            Notify("Statistics Reset", "Protection statistics have been cleared.", "check")
         end,
     })
 
     Tab:Space()
-
     Tab:Section({
         Title = "Privacy & Transparency",
-        Desc = "How SteveHub approaches user privacy.",
+        Desc = "Important limitations of this feature.",
         Icon = "lock-keyhole",
     })
 
     Tab:Paragraph({
-        Title = "Built With Privacy in Mind",
-        Desc = "<b>Your privacy should come first.</b>\n\nSteveHub's IP protection checks request destinations locally. The protection code does not intentionally collect or send your IP address to a third-party service.\n\nWe want users to have greater awareness and control over potentially suspicious network activity.",
-        Icon = "heart",
-    })
-    
-    Tab:Paragraph({
-        Title = "Important Security Notice",
-        Desc = "This feature provides best-effort protection, not guaranteed anonymity.\n\nUnknown websites, alternate HTTP APIs, previously captured function references, and direct networking methods may bypass these checks.\n\nOnly execute scripts from sources you trust.",
-        Icon = "triangle-alert",
+        Title = "Privacy & Security Notice",
+        Desc = [[
+<font size="20" color="#D9B78C"><b>Know the Limitations</b></font>
+
+<font color="#E0D5C5">SteveHub provides <b>best-effort filtering</b>, not guaranteed anonymity.</font>
+
+<font size="17" color="#C6A47D"><b>Important Information</b></font>
+<font color="#CFC5B8">• Any outside server you contact may log the source IP of that connection.
+• Unknown domains can collect IP addresses without using a lookup API.
+• Other HTTP functions, saved references, and native networking can bypass these hooks.
+• Returning nil may cause some scripts expecting a response to error.</font>
+
+<font color="#A99B8A"><i>Use trusted code, and treat this protection as an additional precaution rather than a guarantee.</i></font>
+]],
+        Color = Color3.fromHex("#3B3027"),
+        Image = "", ImageSize = 30, Thumbnail = "", ThumbnailSize = 80,
+        Locked = false, Buttons = {},
     })
 
     return Tab

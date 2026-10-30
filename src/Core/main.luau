@@ -303,7 +303,7 @@ init(Window, WindUI, "Universal/Player.luau")
 init(Window, WindUI, "Universal/Visuals.luau")
 init(Window, WindUI, "Universal/Servers.luau")
 init(Window, WindUI, "Universal/Scripts.luau")
-
+init(Window, WindUI, "Universal/Safety.luau")
 local supported = SupportedGames[game.PlaceId]
 
 if supported then
