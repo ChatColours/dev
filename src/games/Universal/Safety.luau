@@ -52,24 +52,29 @@ if isfunctionhooked(hookfunction) or isfunctionhooked(hookmetamethod) then
     restorefunction(hookfunction)
     restorefunction(hookmetamethod)
 end
-local ogrestorefunction
-ogrestorefunction = hookfunction(restorefunction, function(...)
-    local args = {...}
-    local funct = args[1]
-    if funct == gethwid and Spoofers.HWID.Enabled then
+
+local Meta = getrawmetatable(LocalPlayer)
+local IndexFunction = Meta.__index
+local NamecallFunction = Meta.__namecall
+
+local OriginalRestoreFunction
+
+OriginalRestoreFunction = hookfunction(restorefunction, newcclosure(function(Target, ...)
+    local Blocked = (
+        (Target == gethwid and Spoofers.HWID.Enabled)
+        or (Target == IndexFunction and (
+            Spoofers.USERID.Enabled or Spoofers.USERNAME.Enabled
+        ))
+        or (Target == request and ProtectionEnabled)
+        or (Target == NamecallFunction and ProtectionEnabled)
+    )
+
+    if Blocked then
         return nil
-    elseif funct == getrawmetatable(LocalPlayer).__index and Spoofers.USERID.Enabled then
-        return nil
-    elseif funct == getrawmetatable(LocalPlayer).__index and Spoofers.USERNAME.Enabled then
-        return nil
-    elseif funct == request and ProtectionEnabled then
-        return nil
-    elseif funct == getrawmetatable(game).__namecall and ProtectionEnabled then
-        return nil
-    else
-        return ogrestorefunction(...)
     end
-end)
+
+    return OriginalRestoreFunction(Target, ...)
+end))
 
 local function IsIPv4(Value)
     if type(Value) ~= "string" then return false end
