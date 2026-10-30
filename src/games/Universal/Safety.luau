@@ -369,6 +369,7 @@ return function(Window, WindUI)
         Desc = "Makes scripts that attempt to log your IP get a fake IP address",
         Value = "127.0.0.1",
         Type = "Input", -- or "Textarea"
+        InputIcon = "pen",
         Placeholder = "127.0.0.1",
         Callback = function(input) 
             FakeIp = input
