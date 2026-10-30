@@ -1,5 +1,10 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
+if not hookfunction or not hookmetamethod then
+    warn("[STEVEHUB] Safety module: executor does not support function hooking. This feature is unavailable.")
+    return -- cancel script
+end
+
 local IpGrabbers = {
     "api.ipify.org", "api6.ipify.org", "api64.ipify.org", "ipwho.is",
     "ipinfo.io", "ipapi.co", "ip-api.com", "api.ipapi.is",
@@ -42,6 +47,30 @@ local Spoofers = {
         OgValue = game.Players.LocalPlayer.Name
     }
 }
+
+if isfunctionhooked(hookfunction) or isfunctionhooked(hookmetamethod) then
+    restorefunction(hookfunction)
+    restorefunction(hookmetamethod)
+end
+local ogrestorefunction
+ogrestorefunction = hookfunction(restorefunction, function(...)
+    local args = {...}
+    local funct = args[1]
+    if funct == gethwid and Spoofers.HWID.Enabled then
+        return nil
+    elseif funct == getrawmetatable(LocalPlayer).__index and Spoofers.USERID.Enabled then
+        return nil
+    elseif funct == getrawmetatable(LocalPlayer).__index and Spoofers.USERNAME.Enabled then
+        return nil
+    elseif funct == request and ProtectionEnabled then
+        return nil
+    elseif funct == getrawmetatable(game).__namecall and ProtectionEnabled then
+        return nil
+    else
+        return ogrestorefunction(...)
+    end
+end)
+
 local function IsIPv4(Value)
     if type(Value) ~= "string" then return false end
     local a, b, c, d = Value:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
@@ -148,11 +177,12 @@ local function SpoofBlockedRequest(URL)
     end
     return nil
 end
+
 return function(Window, WindUI)
     local Tab = Window:Tab({
         Title = "Safety",
         Icon = "shield-check",
-        Locked = false,
+        Locked = not hookfunction or not hookmetamethod or not newcclosure or not getnamecallmethod,
     })
     local function Notify(Title, Content, Icon)
         WindUI:Notify({
