@@ -5,6 +5,7 @@ local Tabs = {}
 local FetchAsset = Loader.Require("src/Core/Utilities/files.luau")
 local ServerSearch = Loader.Require("src/Modules/ServerSearch.luau")
 local Version = Loader.Require("src/Core/Utilities/version.luau")
+local Plugins = Loader.Require("src/Core/Utilities/plugins.luau")
 
 const Services = {
     RunService = game:GetService("RunService"),
@@ -253,10 +254,21 @@ SteveHub supports various executors, although certain advanced functions and byp
 
 Some features may be unavailable depending on your executor's supported functions.
 
-<font size="17" color="#C6A47D"><b>Open-Source Development</b></font>
-SteveHub is built with modularity and transparency in mind. SteveHub uses the MIT license, our publicly available code and assets may be studied, modified, and reused. When reusing code from SteveHub, credits must be given as said in the license.
+<font size="17" color="#C6A47D"><b>Plugin Support</b></font>
+<font color="#CFC5B8">SteveHub supports <font color="#D9B78C"><b>community-created plugins</b></font>, allowing users to extend the hub with custom features, utilities, and additional functionality.
 
-Contributions, suggestions, and bug reports are always appreciated as we continue improving the project.
+Plugins can be developed by anyone and shared with the community, making SteveHub even more flexible and customisable.</font>
+
+<font size="15" color="#C6A47D"><b>Installing Plugins</b></font>
+<font color="#CFC5B8">To install a plugin, place its <font color="#D9B78C"><b>.luau</b></font> file inside the following directory:</font>
+
+<font color="#D9B78C"><b>Steve/Plugins/</b></font>
+
+<font color="#A99B8A"><i>This folder is located inside your executor's workspace.</i></font>
+
+<font color="#CFC5B8">SteveHub will automatically detect and load plugins found in this directory.</font>
+
+<font color="#A99B8A"><i>Only install plugins from developers you trust, as plugins can execute their own code.</i></font>
 
 <font size="17" color="#C6A47D"><b>Important Information</b></font>
 <font color="#CFC5B8">• Features may change or become unavailable after game updates.
@@ -324,6 +336,30 @@ if supported then
         init(Window, WindUI, path, tab)
     end
 end
+
+local pluginList = Plugins.ListPlugins()
+local loaded = 0
+for _, pluginPath in ipairs(pluginList) do
+    if not pluginPath:match("%.luau$") and not pluginPath:match("%.lua$") then
+        warn(`[STEVEHUB] Failed to load plugin: {pluginPath} (not a .luau or .lua file)`)
+        continue
+    end
+
+    local plugin, res = Plugins.LoadPlugin(pluginPath, Window, WindUI)
+    if not plugin and res then
+        warn(`[STEVEHUB] Failed to load plugin: {pluginPath}: {res}`)
+    elseif plugin then
+        loaded += 1
+    end
+end
+
+WindUI:Notify({
+    Title = "Plugins Loaded",
+    Content = `Successfully loaded {loaded} plugins.`,
+    Duration = 3, -- 3 seconds
+    Icon = "unplug",
+})
+
 init(Window, WindUI, "Universal/Settings.luau")
 queueonteleport(game:HttpGet(
     "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/main.luau"
