@@ -2,9 +2,10 @@ local NecessaryFiles = {
     "fold.Steve",
     "fold.Steve/assets",
     "fold.Steve/Configurations",
+    "fold.Steve/Plugins"
 }
 
-for _, v in NecessaryFiles do
+for _, v in ipairs(NecessaryFiles) do
     if v:sub(1, 6) == "file." then
         if not isfile(v:sub(6)) then
             writefile(v:sub(6), "")
