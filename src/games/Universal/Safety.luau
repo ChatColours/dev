@@ -18,6 +18,7 @@ local IpGrabbers = {
 }
 local LocalPlayer = Players.LocalPlayer
 local FakeIp = "127.0.0.1"
+local BlockExecutorOnly = true
 local ProtectionEnabled = false
 local RequestHookInstalled = false
 local NamecallHookInstalled = false
@@ -259,7 +260,7 @@ return function(Window, WindUI)
                         Entry = Spoofers.USERNAME
                     end
                     if Entry and Entry.Enabled then
-                        if type(isexecutorthread) == "function" and isexecutorthread() then
+                        if type(isexecutorthread) == "function" and isexecutorthread() and not BlockExecutorOnly then
                             return Entry.Value
                         end
                         return Entry.OgValue
@@ -513,6 +514,15 @@ return function(Window, WindUI)
                 end
             end
             Spoofers.USERNAME.Enabled = State
+        end,
+    })
+        Tab:Toggle({
+        Title = "Block Executor Threads Only",
+        Desc = "Every spoofer (excluding IP protection) will only return the fake value while enabled and it was called by the executor. When disabled, the game cannot access jobids and such.",
+        Icon = "user-round", Flag = "SteveHubSpoofUsername",
+        Type = "Checkbox", Value = true,
+        Callback = function(State)
+            BlockExecutorOnly = State
         end,
     })
     Tab:Space()

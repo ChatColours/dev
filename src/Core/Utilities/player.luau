@@ -15,10 +15,10 @@ function Player.SendFriendReq(player : string)
             end)
             
             if success then
-                break -- Exit the loop once the prompt successfully appears
+                break
             end
             
-            RunService.Heartbeat:Wait() -- Wait one frame before retrying
+            RunService.Heartbeat:Wait()
         end
     end)
 end
