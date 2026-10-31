@@ -519,8 +519,8 @@ return function(Window, WindUI)
         Tab:Toggle({
         Title = "Block Executor Threads Only",
         Desc = "Every spoofer (excluding IP protection) will only return the fake value while enabled and it was called by the executor. When disabled, the game cannot access jobids and such.",
-        Icon = "user-round", Flag = "SteveHubSpoofUsername",
-        Type = "Checkbox", Value = true,
+        Flag = "SteveHubExeThreadOnly",
+        Value = true,
         Callback = function(State)
             BlockExecutorOnly = State
         end,
