@@ -6,13 +6,16 @@ local NecessaryFiles = {
 }
 
 for _, v in ipairs(NecessaryFiles) do
-    if v:sub(1, 6) == "file." then
-        if not isfile(v:sub(6)) then
-            writefile(v:sub(6), "")
+    local Prefix = v:sub(1, 5)
+    local Path = v:sub(6)
+
+    if Prefix == "file." then
+        if not isfile(Path) then
+            writefile(Path, "")
         end
-    elseif v:sub(1, 6) == "fold." then
-        if not isfolder(v:sub(6)) then
-            makefolder(v:sub(6))
+    elseif Prefix == "fold." then
+        if not isfolder(Path) then
+            makefolder(Path)
         end
     end
 end
