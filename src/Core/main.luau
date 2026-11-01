@@ -5,7 +5,7 @@ local Tabs = {}
 local FetchAsset = Loader.Require("src/Core/Utilities/files.luau")
 local ServerSearch = Loader.Require("src/Modules/ServerSearch.luau")
 local Version = Loader.Require("src/Core/Utilities/version.luau")
-local _, Logs = Loader.Require("src/Core/Utilities/logs.luau")
+local Logs = Loader.Require("src/Core/Utilities/logs.luau")
 
 local function LoadPlugin(Path, Window, WindUI)
     local Success, Result = pcall(function()
@@ -365,25 +365,46 @@ end
 
 local pluginList = listfiles("Steve/Plugins")
 local loaded = 0
-for _, pluginPath in ipairs(pluginList) do
-    if not pluginPath:match("%.luau$") and not pluginPath:match("%.lua$") and not pluginPath:match("%.txt$") then
-        Logs:Log(`Failed to load plugin: {pluginPath} (not a .luau, .lua, or .txt file)`, "WARN")
-        WindUI:Notify({
-            Title = "Failed to load plugin",
-            Content = `{pluginPath} is not a .luau, .lua, or .txt file.`,
-            Duration = 3, -- 3 seconds
-            Icon = "unplug",
-        })
-        continue
-    end
 
-    local plugin, res = LoadPlugin(pluginPath, Window, WindUI)
-    if not plugin and res then
-        Logs:Log(`Failed to load plugin: {pluginPath}: {res}`, "ERROR")
-    elseif plugin then
-        loaded += 1
-    end
-end
+WindUI:Popup({
+    Title = "Load plugins?",
+    Content = "SteveHub is not responsible for any damage that may occur from using plugins. Only load plugins from developers you trust, or join our Discord for checked plugins.",
+    Icon = "alert",
+    Buttons = {
+        {
+            Title = "Load Plugins",
+            Variant = "Tertiary",
+            Icon = "check",
+            Callback = function()
+                for _, pluginPath in ipairs(pluginList) do
+                    if not pluginPath:match("%.luau$") and not pluginPath:match("%.lua$") and not pluginPath:match("%.txt$") then
+                        Logs:Log(`Failed to load plugin: {pluginPath} (not a .luau, .lua, or .txt file)`, "WARN")
+                        WindUI:Notify({
+                            Title = "Failed to load plugin",
+                            Content = `{pluginPath} is not a .luau, .lua, or .txt file.`,
+                            Duration = 3, -- 3 seconds
+                            Icon = "unplug",
+                        })
+                        continue
+                    end
+
+                    local plugin, res = LoadPlugin(pluginPath, Window, WindUI)
+                    if not plugin and res then
+                        Logs:Log(`Failed to load plugin: {pluginPath}: {res}`, "ERROR")
+                    elseif plugin then
+                        loaded += 1
+                    end
+                end
+            end
+        },
+        {
+            Title = "Don't Load",
+            Icon = "x",
+            Callback = function() end,
+            Variant = "Primary"
+        }
+    }
+})
 
 WindUI:Notify({
     Title = "Plugins Loaded",
