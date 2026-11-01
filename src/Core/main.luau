@@ -6,9 +6,6 @@ local FetchAsset = Loader.Require("src/Core/Utilities/files.luau")
 local ServerSearch = Loader.Require("src/Modules/ServerSearch.luau")
 local Version = Loader.Require("src/Core/Utilities/version.luau")
 local _, Logs = Loader.Require("src/Core/Utilities/logs.luau")
-local logSession = Logs.new()
-
-logSession:InitializeLogs()
 
 local function LoadPlugin(Path, Window, WindUI)
     local Success, Result = pcall(function()

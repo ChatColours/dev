@@ -3,7 +3,8 @@ local logsession = {}
 logsession.__index = logsession
 module.__index = module
 _G.logHistory = _G.logHistory or {}
-_G.UpdateConnection = nil
+_G.UpdateConnection = _G.UpdateConnection or nil
+_G.LogStarted = false
 local LastRestoredView = nil
 local maxLogs = 300
 
@@ -15,7 +16,7 @@ local MainView = DevUI:WaitForChild("MainView")
 local ClientLogView = MainView:WaitForChild("ClientLog")
 local icon = getcustomasset("Steve/assets/icon.png")
 
-_G.LogSession = nil
+_G.LogSession = _G.LogSession or nil
 local HTMLTemplate = [[
 <!DOCTYPE html>
 <html lang="en">
@@ -420,12 +421,19 @@ if not _G.UpdateConnection then
         if child.Name == "MainView" then
             MainView = child
             ClientLogView = MainView:WaitForChild("ClientLog")
-
+            ClientLogView.AutomaticCanvasSize = Enum.AutomaticSize.XY
             task.defer(function()
                 RestoreLogs()
             end)
         end
     end)
+end
+
+ClientLogView.AutomaticCanvasSize = Enum.AutomaticSize.XY
+
+if not _G.LogStarted then
+    _G.LogStarted = true
+    logsession.new():InitializeLogs()
 end
 
 return module, logsession
