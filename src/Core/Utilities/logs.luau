@@ -2,6 +2,10 @@ local module = {}
 local logsession = {}
 logsession.__index = logsession
 module.__index = module
+_G.logHistory = _G.logHistory or {}
+_G.UpdateConnection = nil
+local LastRestoredView = nil
+local maxLogs = 300
 
 local CoreGui = game:GetService("CoreGui")
 local DevConsole = CoreGui:WaitForChild("DevConsoleMaster")
@@ -10,6 +14,7 @@ local DevUI = DevWindow:WaitForChild("DevConsoleUI")
 local MainView = DevUI:WaitForChild("MainView")
 local ClientLogView = MainView:WaitForChild("ClientLog")
 local icon = getcustomasset("Steve/assets/icon.png")
+
 _G.LogSession = nil
 local HTMLTemplate = [[
 <!DOCTYPE html>
@@ -376,6 +381,11 @@ function module:Log(message: string, logType: string?, customColor: Color3?)
     img.Image = icon
     frame.Parent = ClientLogView
 
+    table.insert(_G.logHistory, formatted)
+    if #_G.logHistory > maxLogs then
+        table.remove(_G.logHistory, 1)
+    end
+
     if _G.LogSession then
         local Entry = string.format(
             EntryTemplate,
@@ -387,6 +397,35 @@ function module:Log(message: string, logType: string?, customColor: Color3?)
 
         appendfile(_G.LogSession.LogFile, Entry)
     end
+end
+
+local function RestoreLogs()
+    if LastRestoredView == ClientLogView then
+        return
+    end
+
+    LastRestoredView = ClientLogView
+
+    for _, log in ipairs(_G.logHistory) do
+        local frame, txtlbl, img = MakeLog()
+
+        txtlbl.Text = log
+        img.Image = icon
+        frame.Parent = ClientLogView
+    end
+end
+
+if not _G.UpdateConnection then
+    _G.UpdateConnection = DevUI.ChildAdded:Connect(function(child)
+        if child.Name == "MainView" then
+            MainView = child
+            ClientLogView = MainView:WaitForChild("ClientLog")
+
+            task.defer(function()
+                RestoreLogs()
+            end)
+        end
+    end)
 end
 
 return module

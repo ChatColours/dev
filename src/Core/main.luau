@@ -5,28 +5,30 @@ local Tabs = {}
 local FetchAsset = Loader.Require("src/Core/Utilities/files.luau")
 local ServerSearch = Loader.Require("src/Modules/ServerSearch.luau")
 local Version = Loader.Require("src/Core/Utilities/version.luau")
-
+local Logs = Loader.Require("src/Core/Utilities/logs.luau")
 
 local function LoadPlugin(Path, Window, WindUI)
     local Success, Result = pcall(function()
         local Chunk, LoadError = loadfile(Path)
 
         if not Chunk then
-            error(LoadError or "Failed to load plugin")
+            Logs:Log(`Failed to load plugin: {Path} -> {LoadError}`, "ERROR")
         end
 
         local Plugin = Chunk()
 
         if type(Plugin) ~= "function" then
-            error("Plugin must return a function")
+            Logs:Log(`Plugin must return a function: {Path}`, "WARN")
         end
 
         return Plugin(Window, WindUI)
     end)
 
     if Success then
+        Logs:Log(`Successfully executed plugin: {Path}`, "SUCCESS")
         return true, Result
     else
+        Logs:Log(`Failed to execute plugin: {Path} -> {tostring(Result)}`, "ERROR")
         return false, tostring(Result)
     end
 end
@@ -352,7 +354,7 @@ if supported then
             tab = Tabs[requiredTab]
 
             if not tab then
-                warn(`Missing required tab: {requiredTab} for {path}`)
+                Logs:Log(`Missing required tab: {requiredTab} for {path}`, "WARN")
                 continue
             end
         end
@@ -365,7 +367,7 @@ local pluginList = listfiles("Steve/Plugins")
 local loaded = 0
 for _, pluginPath in ipairs(pluginList) do
     if not pluginPath:match("%.luau$") and not pluginPath:match("%.lua$") and not pluginPath:match("%.txt$") then
-        warn(`[STEVEHUB] Failed to load plugin: {pluginPath} (not a .luau, .lua, or .txt file)`)
+        Logs:Log(`Failed to load plugin: {pluginPath} (not a .luau, .lua, or .txt file)`, "WARN")
         WindUI:Notify({
             Title = "Failed to load plugin",
             Content = `{pluginPath} is not a .luau, .lua, or .txt file.`,
@@ -377,7 +379,7 @@ for _, pluginPath in ipairs(pluginList) do
 
     local plugin, res = LoadPlugin(pluginPath, Window, WindUI)
     if not plugin and res then
-        warn(`[STEVEHUB] Failed to load plugin: {pluginPath}: {res}`)
+        Logs:Log(`Failed to load plugin: {pluginPath}: {res}`, "ERROR")
     elseif plugin then
         loaded += 1
     end
