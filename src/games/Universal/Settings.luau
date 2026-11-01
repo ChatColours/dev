@@ -124,8 +124,9 @@ return function(Window, WindUI)
             end
         end
     })
+    local HStack = Tab:HStack()
 
-    Tab:Button({
+    HStack:Button({
         Title = "Save Configuration",
         Desc = "Save the current feature settings to a configuration file.",
         Locked = false,
@@ -155,7 +156,7 @@ return function(Window, WindUI)
         end
     })
 
-    Tab:Button({
+    HStack:Button({
         Title = "Load Configuration",
         Desc = "Load the selected configuration.",
         Locked = false,
@@ -190,6 +191,7 @@ return function(Window, WindUI)
     Tab:Button({
         Title = "Delete Configuration",
         Desc = "Permanently delete the selected configuration.",
+        Color = Color3.fromRGB(255,0,0),
         Locked = false,
 
         Callback = function()
@@ -224,8 +226,6 @@ return function(Window, WindUI)
             end
         end
     })
-
-    Tab:Space()
 
     return Tab
 end

@@ -428,4 +428,4 @@ if not _G.UpdateConnection then
     end)
 end
 
-return module
+return module, logsession
