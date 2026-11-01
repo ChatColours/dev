@@ -1,6 +1,7 @@
 local Loader = loadstring(game:HttpGet(
     "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"
 ))()
+local Logs = Loader.Require("src/Core/Utilities/logs.luau")
 
 local ServerModule = Loader.Require("src/Modules/ServerSearch.luau")
 
@@ -69,7 +70,7 @@ local function GetFriendsByServer()
     end)
 
     if not success or type(result) ~= "table" then
-        warn("[SteveHub] Failed to fetch online friends:", result)
+        Logs:Log("Failed to fetch online friends: " .. tostring(result), "ERROR")
         return friendsByServer, false
     end
 
@@ -98,13 +99,14 @@ local function DecodeServers(result)
     end
 
     if type(result) ~= "table" then
-        error("Invalid server response")
+        Logs:Log("Invalid server response", "ERROR")
     end
 
     local data = result.data or result.Data or result
 
     if type(data) ~= "table" then
-        error("Server response contains no valid data")
+        Logs:Log("Server response contains no valid data", "ERROR")
+        return {}
     end
 
     return data

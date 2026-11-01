@@ -2,7 +2,8 @@ local NecessaryFiles = {
     "fold.Steve",
     "fold.Steve/assets",
     "fold.Steve/Configurations",
-    "fold.Steve/Plugins"
+    "fold.Steve/Plugins",
+    "fold.Steve/Logs"
 }
 
 for _, v in ipairs(NecessaryFiles) do

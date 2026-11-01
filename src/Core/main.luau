@@ -5,7 +5,31 @@ local Tabs = {}
 local FetchAsset = Loader.Require("src/Core/Utilities/files.luau")
 local ServerSearch = Loader.Require("src/Modules/ServerSearch.luau")
 local Version = Loader.Require("src/Core/Utilities/version.luau")
-local Plugins = Loader.Require("src/Core/Utilities/plugins.luau")
+
+
+local function LoadPlugin(Path, Window, WindUI)
+    local Success, Result = pcall(function()
+        local Chunk, LoadError = loadfile(Path)
+
+        if not Chunk then
+            error(LoadError or "Failed to load plugin")
+        end
+
+        local Plugin = Chunk()
+
+        if type(Plugin) ~= "function" then
+            error("Plugin must return a function")
+        end
+
+        return Plugin(Window, WindUI)
+    end)
+
+    if Success then
+        return true, Result
+    else
+        return false, tostring(Result)
+    end
+end
 
 const Services = {
     RunService = game:GetService("RunService"),
@@ -337,15 +361,21 @@ if supported then
     end
 end
 
-local pluginList = Plugins.ListPlugins()
+local pluginList = listfiles("Steve/Plugins")
 local loaded = 0
 for _, pluginPath in ipairs(pluginList) do
-    if not pluginPath:match("%.luau$") and not pluginPath:match("%.lua$") then
-        warn(`[STEVEHUB] Failed to load plugin: {pluginPath} (not a .luau or .lua file)`)
+    if not pluginPath:match("%.luau$") and not pluginPath:match("%.lua$") and not pluginPath:match("%.txt$") then
+        warn(`[STEVEHUB] Failed to load plugin: {pluginPath} (not a .luau, .lua, or .txt file)`)
+        WindUI:Notify({
+            Title = "Failed to load plugin",
+            Content = `{pluginPath} is not a .luau, .lua, or .txt file.`,
+            Duration = 3, -- 3 seconds
+            Icon = "unplug",
+        })
         continue
     end
 
-    local plugin, res = Plugins.LoadPlugin(pluginPath, Window, WindUI)
+    local plugin, res = LoadPlugin(pluginPath, Window, WindUI)
     if not plugin and res then
         warn(`[STEVEHUB] Failed to load plugin: {pluginPath}: {res}`)
     elseif plugin then

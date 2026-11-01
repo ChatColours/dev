@@ -1,5 +1,8 @@
 local API = "https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100"
 local HttpService = game:GetService("HttpService")
+local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
+local Logs = Loader.Require("src/Core/Utilities/logs.luau")
+
 local Servers = {}
 function Servers.FetchServers(MaxServers)
     local Servers = {}
@@ -18,7 +21,7 @@ function Servers.FetchServers(MaxServers)
         end)
 
         if not Success then
-            warn("Failed to fetch servers:", Result)
+            Logs:Log("Failed to fetch servers: " .. Result, "ERROR")
             break
         end
 

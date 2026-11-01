@@ -1,3 +1,6 @@
+local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
+local Logs = Loader.Require("src/Core/Utilities/logs.luau")
+
 local Config = {}
 Config.__index = Config
 
@@ -68,7 +71,10 @@ function Config:Save(data)
     end)
 
     if not Success then
-        warn("[ConfigManager] Failed to save:", Result)
+        Logs:Log(
+            "Failed to save configuration: " .. Result,
+            "ERROR"
+        )
         return false, Result
     end
 
@@ -86,7 +92,10 @@ function Config:Load()
     end)
 
     if not Success then
-        warn("[ConfigManager] Failed to load:", Result)
+        Logs:Log(
+            "Failed to load configuration: " .. Result,
+            "ERROR"
+        )
         return false, Result
     end
 
@@ -113,7 +122,10 @@ function Config:Delete()
     end)
 
     if not Success then
-        warn("[ConfigManager] Failed to delete:", Result)
+        Logs:Log(
+            "Failed to delete configuration: " .. Result,
+            "ERROR"
+        )
         return false, Result
     end
 
@@ -128,7 +140,10 @@ function Config:AllConfigs()
     end)
 
     if not Success then
-        warn("[ConfigManager] Failed to list configurations:", Files)
+        Logs:Log(
+            "Failed to list configurations: " .. Files,
+            "ERROR"
+        )
         return {}
     end
 

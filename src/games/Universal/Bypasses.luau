@@ -1,7 +1,8 @@
 local g = getinfo or debug.getinfo
 local d = false
 local h = {}
-
+local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
+local Logs = Loader.Require("src/Core/Utilities/logs.luau")
 local x, y
 
 setthreadidentity(2)
@@ -17,6 +18,7 @@ for i, v in getgc(true) do
             local o; o = hookfunction(x, function(c, f, n)
                 if c ~= "_" then
                     if d then
+                        Logs:Log(`Adonis AntiCheat flagged\nMethod: {c}\nInfo: {f}`, "WARN")
                         warn(`Adonis AntiCheat flagged\nMethod: {c}\nInfo: {f}`)
                     end
                 end
@@ -31,7 +33,7 @@ for i, v in getgc(true) do
             y = b
             local o; o = hookfunction(y, function(f)
                 if d then
-                    warn(`Adonis AntiCheat tried to kill (fallback): {f}`)
+                    Logs:Log(`Adonis AntiCheat tried to kill (fallback): {f}`, "WARN")
                 end
             end)
 
@@ -45,7 +47,7 @@ local o; o = hookfunction(getrenv().debug.info, newcclosure(function(...)
 
     if x and a == x then
         if d then
-            warn(`zins | adonis bypassed`)
+            Logs:Log(`Adonis bypassed`, "SUCCESS")
         end
 
         return coroutine.yield(coroutine.running())

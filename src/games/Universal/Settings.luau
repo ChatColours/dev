@@ -1,5 +1,5 @@
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
-
+local Logs = Loader.Require("src/Core/Utilities/logs.luau")
 local ConfigManager = _G.ConfigManager
 
 local ogCap = getfpscap and getfpscap() or 60
@@ -16,7 +16,7 @@ local function ChangeFPS(value: number)
         local Success, Error = pcall(setfpscap, value)
 
         if not Success then
-            warn("[Settings] Failed to change FPS:", Error)
+            Logs:Log("Failed to change FPS: " .. tostring(Error), "error")
         end
     end
 end
@@ -30,7 +30,7 @@ local function SetFPSUnlocked(state: boolean)
         local Success, Error = pcall(setfpscap, ogCap)
 
         if not Success then
-            warn("[Settings] Failed to restore FPS:", Error)
+            Logs:Log("Failed to restore FPS: " .. tostring(Error), "error")
         end
     end
 end
@@ -120,7 +120,7 @@ return function(Window, WindUI)
                 currConfig = Result
             else
                 currConfig = nil
-                warn("[Settings] Failed to select configuration:", Result)
+                Logs:Log("Failed to select configuration: " .. Result, "ERROR")
             end
         end
     })
@@ -150,6 +150,7 @@ return function(Window, WindUI)
                     "Save Failed",
                     tostring(Success and Error or Result)
                 )
+                Logs:Log("Failed to save configuration: " .. tostring(Success and Error or Result), "ERROR")
             end
         end
     })
@@ -223,6 +224,8 @@ return function(Window, WindUI)
             end
         end
     })
+
+    Tab:Space()
 
     return Tab
 end

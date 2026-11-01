@@ -1,15 +1,17 @@
 local loader = {}
 local baseurl = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/"
+local logs = loadstring(game:HttpGet(baseurl.. "src/Core/Utilities/logs.luau"))()
 local cache = {}
 
 function loader.Require(path)
     local a = tick()
 
     if cache[path] then
-        print(`[STEVEHUB] Loaded {path} in {tostring(tick() - a)} (CACHED)`)
+        logs:Log(`Loaded {path} in {tostring(tick() - a)} (CACHED)`, "SUCCESS")
         return cache[path]
     end
-    print("[STEVEHUB] Loading: ".. baseurl.. path)
+    
+    logs:Log("Loading: " .. path, "INFO")
     local url = baseurl.. path
 
     local success, result = pcall(function()
@@ -17,12 +19,12 @@ function loader.Require(path)
     end)
     
     if not success then
-        warn(`[STEVEHUB.REQUIRE] Failed to load {url} -> {result}: {debug.traceback()}`)
+        logs:Log(`Failed to load {path} -> {result}: {debug.traceback()}`, "ERROR")
         return nil
     end
 
     cache[path] = result
-     print(`[STEVEHUB] Loaded {path} in {tostring(tick() - a)}`)
+    logs:Log(`Loaded {path} in {tostring(tick() - a)}`, "SUCCESS")
     return result
 end
 
