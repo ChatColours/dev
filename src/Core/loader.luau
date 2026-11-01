@@ -14,10 +14,11 @@ function loader.Require(path)
     logs:Log("Loading: " .. path, "INFO")
     local url = baseurl.. path
 
-    local success, result = pcall(function()
+    local results = table.pack(pcall(function()
         return loadstring(game:HttpGet(url))()
-    end)
-    
+    end))
+    local success = results[1]
+    local result = results[2]  
     if not success then
         logs:Log(`Failed to load {path} -> {result}: {debug.traceback()}`, "ERROR")
         return nil
@@ -25,7 +26,7 @@ function loader.Require(path)
 
     cache[path] = result
     logs:Log(`Loaded {path} in {tostring(tick() - a)}`, "SUCCESS")
-    return result
+    return table.unpack(results, 2, results.n)
 end
 
 return loader
