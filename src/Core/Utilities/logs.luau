@@ -12,8 +12,8 @@ local CoreGui = game:GetService("CoreGui")
 local DevConsole = CoreGui:WaitForChild("DevConsoleMaster")
 local DevWindow = DevConsole:WaitForChild("DevConsoleWindow")
 local DevUI = DevWindow:WaitForChild("DevConsoleUI")
-local MainView = DevUI:WaitForChild("MainView")
-local ClientLogView = MainView:WaitForChild("ClientLog")
+local MainView = DevUI:FindFirstChild("MainView")
+local ClientLogView = MainView and MainView:WaitForChild("ClientLog")
 local icon = getcustomasset("Steve/assets/icon.png")
 
 _G.LogSession = _G.LogSession or nil

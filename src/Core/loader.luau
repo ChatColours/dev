@@ -2,6 +2,7 @@ if type(_G.Loader) == "table"
     and type(_G.Loader.Require) == "function" then
     return _G.Loader
 end
+
 local loader = {}
 
 local baseurl = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/"
