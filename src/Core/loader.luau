@@ -11,8 +11,10 @@ function loader.Require(path)
     local a = tick()
 
     if cache[path] then
-        logs:Log(`Loaded {path} in {tostring(tick() - a)} (CACHED)`, "SUCCESS")
-        return cache[path]
+        logs:Log(`Loaded {path} in {tick() - a} (CACHED)`, "SUCCESS")
+
+        local cached = cache[path]
+        return table.unpack(cached, 2, cached.n)
     end
     
     logs:Log("Loading: " .. path, "INFO")
@@ -28,7 +30,7 @@ function loader.Require(path)
         return nil
     end
 
-    cache[path] = result
+    cache[path] = results
     logs:Log(`Loaded {path} in {tostring(tick() - a)}`, "SUCCESS")
     return table.unpack(results, 2, results.n)
 end
