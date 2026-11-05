@@ -1,4 +1,5 @@
-if _G.Loader then
+if type(_G.Loader) == "table"
+    and type(_G.Loader.Require) == "function" then
     return _G.Loader
 end
 local loader = {}
