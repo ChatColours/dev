@@ -24,7 +24,7 @@ function loader.Require(path)
         return nil
     end
 
-    cache[path] = result
+    cache[path] = result -- store variables globally
     logs:Log(`Loaded {path} in {tostring(tick() - a)}`, "SUCCESS")
     return table.unpack(results, 2, results.n)
 end

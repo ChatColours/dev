@@ -2,6 +2,11 @@ local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/rel
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
 local Tabs = {}
 
+local License = ""
+local LicenseStatus = "Inactive"
+local LicenseURL = ""
+local SupportURL = ""
+
 local FetchAsset = Loader.Require("src/Core/Utilities/files.luau")
 local ServerSearch = Loader.Require("src/Modules/ServerSearch.luau")
 local Version = Loader.Require("src/Core/Utilities/version.luau")
@@ -99,6 +104,215 @@ local function GetFailedAndPassed()
 end
 
 -- main window --
+local redeemedKey = false
+
+local KeyWindow = WindUI:CreateWindow({
+    Title = "Steve Hub",
+    Icon = FetchAsset("icon.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/icon.jpg"), -- lucide icon
+    Author = "By ChatColours",
+    Folder = "Steve",
+    
+    -- ↓ This all is Optional. You can remove it.
+    Size = UDim2.fromOffset(580, 460),
+    MinSize = Vector2.new(560, 350),
+    MaxSize = Vector2.new(850, 560),
+    ToggleKey = Enum.KeyCode.RightShift,
+    Transparent = true,
+    Background = FetchAsset("background.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/background.png"),
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 200,
+    BackgroundImageTransparency = 0.42,
+    HideSearchBar = true,
+    ScrollBarEnabled = false,
+    IconSize = 32,
+    User = {
+        Enabled = true,
+        Anonymous = false,
+        Callback = function()
+            print("clicked")
+        end,
+    },
+})
+
+
+local Tab = KeyWindow:Tab({
+    Title = "License System",
+    Icon = "shield-check",
+    Locked = false,
+})
+
+local License = ""
+local LicenseStatus = "Not Activated"
+local LicenseProvider = "Steve Hub"
+
+local LicenseInformation = Tab:Paragraph({
+    Title = "License Activation",
+    Desc = "Welcome to Steve Hub! Activate your license to unlock access to all available features.",
+    Icon = "shield-check",
+})
+
+local LicenseStatusParagraph = Tab:Paragraph({
+    Title = "License Status",
+    Desc = "Status: Not Activated\nProvider: Steve Hub\n\nEnter your license below to get started.",
+    Icon = "circle-alert",
+})
+
+local Input = Tab:Input({
+    Title = "License Code",
+    Desc = "Enter the license associated with your account.",
+    Value = "",
+    InputIcon = "key-round",
+    Type = "Input",
+    Placeholder = "Enter your license...",
+    Callback = function(input)
+        License = input
+    end,
+})
+
+local function UpdateLicenseStatus(Status, Description, Icon)
+    LicenseStatus = Status
+
+    LicenseStatusParagraph:SetDesc(
+        "Status: " .. Status ..
+        "\nProvider: " .. LicenseProvider ..
+        "\n\n" .. Description
+    )
+end
+
+Tab:Button({
+    Title = "Activate License",
+    Desc = "Verify your license and activate Steve Hub.",
+    Icon = "shield-check",
+    Callback = function()
+        if License == "" or not License:match("%S") then
+            WindUI:Notify({
+                Title = "License Required",
+                Content = "Please enter your license before attempting activation.",
+                Icon = "triangle-alert",
+                Duration = 4,
+            })
+            return
+        end
+
+        UpdateLicenseStatus(
+            "Verifying",
+            "Your license is currently being verified.",
+            "loader-circle"
+        )
+
+        -- Connect your actual license validation API here.
+        -- The API should return whether the license is valid
+        -- and a rejection reason when it is not.
+
+        WindUI:Notify({
+            Title = "License Verification",
+            Content = "License submitted. Connect your validation API to complete activation.",
+            Icon = "info",
+            Duration = 4,
+        })
+    end,
+})
+
+Tab:Space()
+
+Tab:Paragraph({
+    Title = "Don't Have a License?",
+    Desc = "You need a valid Steve Hub license to access protected features. Obtain one using the option below.",
+    Icon = "circle-help",
+})
+
+Tab:Button({
+    Title = "Get a License",
+    Desc = "Copy the license acquisition link to your clipboard.",
+    Icon = "external-link",
+    Callback = function()
+        local LicenseURL = "" -- Your license URL
+
+        if LicenseURL == "" then
+            WindUI:Notify({
+                Title = "Unavailable",
+                Content = "The license acquisition URL has not been configured.",
+                Icon = "triangle-alert",
+                Duration = 4,
+            })
+            return
+        end
+
+        if setclipboard then
+            setclipboard(LicenseURL)
+
+            WindUI:Notify({
+                Title = "Link Copied",
+                Content = "The license acquisition link has been copied to your clipboard.",
+                Icon = "check",
+                Duration = 3,
+            })
+        end
+    end,
+})
+
+Tab:Space()
+
+Tab:Paragraph({
+    Title = "Device Information",
+    Desc = "Some licenses may be linked to your device to prevent unauthorized sharing.",
+    Icon = "monitor",
+})
+
+Tab:Button({
+    Title = "Copy HWID",
+    Desc = "Copy your device's hardware identifier.",
+    Icon = "copy",
+    Callback = function()
+        if type(gethwid) ~= "function" then
+            WindUI:Notify({
+                Title = "Unavailable",
+                Content = "Your environment does not support retrieving a HWID.",
+                Icon = "triangle-alert",
+                Duration = 4,
+            })
+            return
+        end
+
+        if not setclipboard then
+            return
+        end
+
+        local Success, HWID = pcall(gethwid)
+
+        if Success and HWID then
+            setclipboard(tostring(HWID))
+
+            WindUI:Notify({
+                Title = "HWID Copied",
+                Content = "Your hardware identifier has been copied.",
+                Icon = "check",
+                Duration = 3,
+            })
+        else
+            WindUI:Notify({
+                Title = "Error",
+                Content = "Failed to retrieve your hardware identifier.",
+                Icon = "triangle-alert",
+                Duration = 4,
+            })
+        end
+    end,
+})
+
+Tab:Space()
+
+Tab:Paragraph({
+    Title = "License Security",
+    Desc = "• Licenses may be bound to a specific device.\n• Sharing licenses may result in revocation.\n• Revoked or expired licenses cannot be activated.\n• Contact staff if you experience activation issues.",
+    Icon = "shield",
+})
+
+
+while not redeemedKey do
+    task.wait() -- yield
+end
 
 local Window = WindUI:CreateWindow({
     Title = "Steve Hub",
