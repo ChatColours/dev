@@ -1,4 +1,9 @@
+if _G.Loader then
+    return _G.Loader
+end
 local loader = {}
+_G.Loader = loader
+
 local baseurl = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/"
 local logs = loadstring(game:HttpGet(baseurl.. "src/Core/Utilities/logs.luau"))()
 local cache = {}
@@ -24,7 +29,7 @@ function loader.Require(path)
         return nil
     end
 
-    cache[path] = result -- store variables globally
+    cache[path] = result
     logs:Log(`Loaded {path} in {tostring(tick() - a)}`, "SUCCESS")
     return table.unpack(results, 2, results.n)
 end

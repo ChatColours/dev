@@ -1,6 +1,4 @@
-local Loader = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"
-))()
+local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
 local Logs = Loader.Require("src/Core/Utilities/logs.luau")
 
 local ServerModule = Loader.Require("src/Modules/ServerSearch.luau")

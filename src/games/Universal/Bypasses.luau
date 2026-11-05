@@ -2,7 +2,6 @@ local g = getinfo or debug.getinfo
 local d = false
 local h = {}
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
-local Logs = Loader.Require("src/Core/Utilities/logs.luau")
 local x, y
 
 setthreadidentity(2)

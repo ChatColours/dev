@@ -1,4 +1,4 @@
-local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
+local Loader = _G.Loader
 local Globals = Loader.Require("src/games/TheChosenOne/Global.luau")
 
 local RunService = game:GetService("RunService")

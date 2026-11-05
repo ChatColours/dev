@@ -1,6 +1,5 @@
 local HttpService = game:GetService("HttpService")
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
-local Logs = Loader.Require("src/Core/Utilities/logs.luau")
 local Players = game:GetService("Players")
 if not hookfunction or not hookmetamethod then
     Logs:Log("Safety module: executor does not support function hooking. This feature is unavailable.", "WARN")
