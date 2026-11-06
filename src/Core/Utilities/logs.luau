@@ -428,8 +428,9 @@ if not _G.UpdateConnection then
         end
     end)
 end
-
-ClientLogView.AutomaticCanvasSize = Enum.AutomaticSize.XY
+if ClientLogView then
+    ClientLogView.AutomaticCanvasSize = Enum.AutomaticSize.XY
+end
 
 if not _G.LogStarted then
     _G.LogStarted = true
