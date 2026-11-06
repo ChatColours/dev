@@ -428,7 +428,9 @@ if not _G.UpdateConnection then
         end
     end)
 end
+warn(ClientLogView)
 if ClientLogView ~= nil then
+    print("Set client automatic")
     ClientLogView.AutomaticCanvasSize = Enum.AutomaticSize.XY
 end
 
