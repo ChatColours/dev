@@ -285,7 +285,7 @@ local function MakeLog()
     TextLabel.RichText = true
     TextLabel.FontFace = Font.new("rbxasset://fonts/families/Inconsolata.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 
-    local Index = ClientLogView and ClientLogView:GetChildren() or 0
+    local Index = (ClientLogView and ClientLogView:GetChildren()) or 0
     Index = #Index + 1
     Frame.Name = tostring(Index)
     Frame.LayoutOrder = Index
