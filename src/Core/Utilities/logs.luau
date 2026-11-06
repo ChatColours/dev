@@ -285,7 +285,7 @@ local function MakeLog()
     TextLabel.RichText = true
     TextLabel.FontFace = Font.new("rbxasset://fonts/families/Inconsolata.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 
-    local Index = ClientLogView:GetChildren()
+    local Index = ClientLogView and ClientLogView:GetChildren() or 0
     Index = #Index + 1
     Frame.Name = tostring(Index)
     Frame.LayoutOrder = Index
@@ -380,7 +380,7 @@ function module:Log(message: string, logType: string?, customColor: Color3?)
     local frame, txtlbl, img = MakeLog()
     txtlbl.Text = formatted
     img.Image = icon
-    frame.Parent = ClientLogView
+    frame.Parent = ClientLogView or nil
 
     table.insert(_G.logHistory, formatted)
     if #_G.logHistory > maxLogs then
@@ -412,7 +412,7 @@ local function RestoreLogs()
 
         txtlbl.Text = log
         img.Image = icon
-        frame.Parent = ClientLogView
+        frame.Parent = ClientLogView or nil
     end
 end
 
