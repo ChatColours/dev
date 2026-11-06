@@ -97,7 +97,7 @@ end
 
 local Window = WindUI:CreateWindow({
     Title = "Steve Hub",
-    Icon = FetchAsset("icon.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/icon.jpg"), -- lucide icon
+    Icon = FetchAsset("icon.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/icon.png"), -- lucide icon
     Author = "By ChatColours",
     Folder = "Steve",
     
@@ -107,8 +107,6 @@ local Window = WindUI:CreateWindow({
     MaxSize = Vector2.new(850, 560),
     ToggleKey = Enum.KeyCode.RightShift,
     Transparent = true,
-    Background = FetchAsset("background.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/background.png"),
-    Theme = "Dark",
     Resizable = true,
     SideBarWidth = 200,
     BackgroundImageTransparency = 0.42,
