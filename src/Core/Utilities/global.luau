@@ -1,3 +1,2 @@
-local globals = {}
-
-return globals
+_G.globals = _G.globals or {}
+return _G.globals

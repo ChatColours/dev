@@ -285,7 +285,7 @@ local function MakeLog()
     TextLabel.RichText = true
     TextLabel.FontFace = Font.new("rbxasset://fonts/families/Inconsolata.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 
-    local Index = (ClientLogView and ClientLogView:GetChildren()) or 0
+    local Index = (ClientLogView and ClientLogView:GetChildren()) or {}
     Index = #Index + 1
     Frame.Name = tostring(Index)
     Frame.LayoutOrder = Index
@@ -377,10 +377,12 @@ function module:Log(message: string, logType: string?, customColor: Color3?)
         formattedMessage
     )
 
-    local frame, txtlbl, img = MakeLog()
-    txtlbl.Text = formatted
-    img.Image = icon
-    frame.Parent = ClientLogView or nil
+    if ClientLogView then
+        local frame, txtlbl, img = MakeLog()
+        txtlbl.Text = formatted
+        img.Image = icon
+        frame.Parent = ClientLogView
+    end
 
     table.insert(_G.logHistory, formatted)
     if #_G.logHistory > maxLogs then
@@ -428,9 +430,8 @@ if not _G.UpdateConnection then
         end
     end)
 end
-warn(ClientLogView)
+
 if ClientLogView ~= nil then
-    print("Set client automatic")
     ClientLogView.AutomaticCanvasSize = Enum.AutomaticSize.XY
 end
 

@@ -6,6 +6,7 @@ local FetchAsset = Loader.Require("src/Core/Utilities/files.luau")
 local ServerSearch = Loader.Require("src/Modules/ServerSearch.luau")
 local Version = Loader.Require("src/Core/Utilities/version.luau")
 local Logs = Loader.Require("src/Core/Utilities/logs.luau")
+local ThemesLoader = Loader.Require("src/misc/Themes.luau")
 
 local function LoadPlugin(Path, Window, WindUI)
     local Success, Result = pcall(function()
@@ -156,81 +157,8 @@ WindUI:Popup({
     }
 })
 
-WindUI:AddTheme({
-    Name = "Minecraft",
-
-    -- Stone / dirt background
-    Accent = WindUI:Gradient({
-        ["0"] = {
-            Color = Color3.fromHex("#8B6B47"),
-            Transparency = 0
-        },
-        ["100"] = {
-            Color = Color3.fromHex("#59422F"),
-            Transparency = 0
-        }
-    }, {
-        Rotation = 45
-    }),
-
-    Background = Color3.fromHex("#292722"),
-    BackgroundTransparency = 0,
-
-    -- Text
-    Text = Color3.fromHex("#F0E9DC"),
-    Placeholder = Color3.fromHex("#A99F90"),
-    Icon = Color3.fromHex("#B6A38A"),
-    Outline = Color3.fromHex("#50483F"),
-
-    -- Stone buttons
-    Button = WindUI:Gradient({
-        ["0"] = {
-            Color = Color3.fromHex("#48443E"),
-            Transparency = 0
-        },
-        ["100"] = {
-            Color = Color3.fromHex("#302D29"),
-            Transparency = 0
-        }
-    }, {
-        Rotation = 90
-    }),
-
-    Hover = Color3.fromHex("#A88B62"),
-
-    -- Window
-    WindowBackground = WindUI:Gradient({
-        ["0"] = {
-            Color = Color3.fromHex("#302B25"),
-            Transparency = 0
-        },
-        ["100"] = {
-            Color = Color3.fromHex("#1A1917"),
-            Transparency = 0
-        }
-    }, {
-        Rotation = 90
-    }),
-
-    WindowShadow = Color3.fromHex("#0D0B09"),
-
-    -- Topbar
-    WindowTopbarButtonIcon = Color3.fromHex("#C9BAA5"),
-    WindowTopbarTitle = Color3.fromHex("#F5EEE2"),
-    WindowTopbarAuthor = Color3.fromHex("#C4A16D"),
-    WindowTopbarIcon = Color3.fromHex("#D1BA8E"),
-
-    -- Tabs
-    TabBackground = Color3.fromHex("#40382F"),
-    TabTitle = Color3.fromHex("#EDE3D3"),
-    TabIcon = Color3.fromHex("#BBA88E"),
-
-    -- Elements
-    ElementBackground = Color3.fromHex("#332F29"),
-    ElementBackgroundHover = Color3.fromHex("#463D32"),
-})
-
-WindUI:SetTheme("Minecraft")
+ThemesLoader.Register(WindUI)
+WindUI:SetTheme("Catppuccin Mocha")
 
 local ReadMe = Window:Tab({
     Title = "Read Me",
