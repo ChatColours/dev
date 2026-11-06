@@ -13,7 +13,7 @@ local DevConsole = CoreGui:WaitForChild("DevConsoleMaster")
 local DevWindow = DevConsole:WaitForChild("DevConsoleWindow")
 local DevUI = DevWindow:WaitForChild("DevConsoleUI")
 local MainView = DevUI:FindFirstChild("MainView")
-local ClientLogView = MainView and MainView:WaitForChild("ClientLog")
+local ClientLogView = (MainView and MainView:WaitForChild("ClientLog"))
 local icon = getcustomasset("Steve/assets/icon.png")
 
 _G.LogSession = _G.LogSession or nil
@@ -428,7 +428,7 @@ if not _G.UpdateConnection then
         end
     end)
 end
-if ClientLogView then
+if ClientLogView ~= nil then
     ClientLogView.AutomaticCanvasSize = Enum.AutomaticSize.XY
 end
 
