@@ -4,18 +4,47 @@ if type(_G.Loader) == "table"
 end
 
 local loader = {}
+loader.loadedimages = false
 
 local baseurl = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/"
 local logs = loadstring(game:HttpGet(baseurl.. "src/Core/Utilities/logs.luau"))()
-local cache = {}
+loader.cache = {}
+
+local function get(FileName, Link)
+    if isfile("MochaHub/assets/".. FileName) then
+        return getcustomasset("MochaHub/assets/".. FileName)
+    else
+        local success, result = pcall(function()
+            return game:HttpGet(Link)
+        end)
+        if success then
+            writefile("MochaHub/assets/".. FileName, result)
+            return getcustomasset("MochaHub/assets/".. FileName)
+        end
+    end
+    return nil
+end 
+
+local assetUrl = baseurl.. "assets/"
+local images = {
+    "icon.png",
+    "banner.png"
+}
+
+if not loader.loadedimages then
+    for _, path in ipairs(images) do
+        get(path, assetUrl.. path)
+    end
+    loader.loadedimages = true
+end
 
 function loader.Require(path)
     local a = tick()
 
-    if cache[path] then
+    if loader.cache[path] then
         logs:Log(`Loaded {path} in {tick() - a} (CACHED)`, "SUCCESS")
 
-        local cached = cache[path]
+        local cached = loader.cache[path]
         return table.unpack(cached, 2, cached.n)
     end
     
@@ -32,7 +61,7 @@ function loader.Require(path)
         return nil
     end
 
-    cache[path] = results
+    loader.cache[path] = results
     logs:Log(`Loaded {path} in {tostring(tick() - a)}`, "SUCCESS")
     return table.unpack(results, 2, results.n)
 end

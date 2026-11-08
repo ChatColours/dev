@@ -24,15 +24,15 @@ for _, v in ipairs(NecessaryFiles) do
 end
 
 return function(FileName, Link)
-    if isfile("Steve/assets/".. FileName) then
-        return getcustomasset("Steve/assets/".. FileName)
+    if isfile("MochaHub/assets/".. FileName) then
+        return getcustomasset("MochaHub/assets/".. FileName)
     else
         local success, result = pcall(function()
             return game:HttpGet(Link)
         end)
         if success then
-            writefile("Steve/assets/".. FileName, result)
-            return getcustomasset("Steve/assets/".. FileName)
+            writefile("MochaHub/assets/".. FileName, result)
+            return getcustomasset("MochaHub/assets/".. FileName)
         end
     end
     return nil
