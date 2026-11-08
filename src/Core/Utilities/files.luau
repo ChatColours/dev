@@ -25,6 +25,7 @@ end
 
 return function(FileName, Link)
     if isfile("MochaHub/assets/".. FileName) then
+        print("returning thing")
         return getcustomasset("MochaHub/assets/".. FileName)
     else
         local success, result = pcall(function()
