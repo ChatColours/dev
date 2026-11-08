@@ -14,7 +14,7 @@ local DevWindow = DevConsole:WaitForChild("DevConsoleWindow")
 local DevUI = DevWindow:WaitForChild("DevConsoleUI")
 local MainView = DevUI:FindFirstChild("MainView")
 local ClientLogView = (MainView and MainView:WaitForChild("ClientLog"))
-local icon = getcustomasset("MochaHub/assets/icon.png")
+local icon = getcustomasset("MochaHub/assets/dog.png")
 
 _G.LogSession = _G.LogSession or nil
 local HTMLTemplate = [[
