@@ -1,7 +1,7 @@
 local module = {}
 
 function module.ListPlugins()
-    return listfiles("Steve/Plugins")
+    return listfiles("MochaHub/Plugins")
 end
 
 function module.LoadPlugin(Path, Window, WindUI)

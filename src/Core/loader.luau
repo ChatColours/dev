@@ -40,7 +40,7 @@ end
 
 function loader.Require(path)
     local a = tick()
-
+    print(`Loader is loading {path}`)
     if loader.cache[path] then
         logs:Log(`Loaded {path} in {tick() - a} (CACHED)`, "SUCCESS")
 
