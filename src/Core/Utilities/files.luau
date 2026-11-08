@@ -14,6 +14,7 @@ for _, v in ipairs(NecessaryFiles) do
     if Prefix == "file." then
         if not isfile(Path) then
             writefile(Path, "")
+            print("wrote: ".. Path)
         end
     elseif Prefix == "fold." then
         if not isfolder(Path) then
