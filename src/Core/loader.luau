@@ -7,10 +7,6 @@ local loader = {}
 loader.loadedimages = false
 
 local baseurl = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/"
-
-local logs = loadstring(game:HttpGet(baseurl.. "src/Core/Utilities/logs.luau"))()
-loader.cache = {}
-
 local function get(FileName, Link)
     if isfile("MochaHub/assets/".. FileName) then
         return getcustomasset("MochaHub/assets/".. FileName)
@@ -38,6 +34,10 @@ if not loader.loadedimages then
     end
     loader.loadedimages = true
 end
+
+local logs = loadstring(game:HttpGet(baseurl.. "src/Core/Utilities/logs.luau"))()
+loader.cache = {}
+
 
 function loader.Require(path)
     local a = tick()

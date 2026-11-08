@@ -1,5 +1,5 @@
 local module = {}
-print("logs is loading")
+
 local logsession = {}
 logsession.__index = logsession
 module.__index = module
@@ -15,7 +15,7 @@ local DevWindow = DevConsole:WaitForChild("DevConsoleWindow")
 local DevUI = DevWindow:WaitForChild("DevConsoleUI")
 local MainView = DevUI:FindFirstChild("MainView")
 local ClientLogView = (MainView and MainView:WaitForChild("ClientLog"))
-local icon = getcustomasset("MochaHub/assets/dog.png")
+local icon = getcustomasset("MochaHub/assets/icon.png")
 
 _G.LogSession = _G.LogSession or nil
 local HTMLTemplate = [[
