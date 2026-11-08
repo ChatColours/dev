@@ -14,7 +14,7 @@ local DevWindow = DevConsole:WaitForChild("DevConsoleWindow")
 local DevUI = DevWindow:WaitForChild("DevConsoleUI")
 local MainView = DevUI:FindFirstChild("MainView")
 local ClientLogView = (MainView and MainView:WaitForChild("ClientLog"))
-local icon = getcustomasset("Mocha/assets/icon.png")
+local icon = getcustomasset("MochaHub/assets/icon.png")
 
 _G.LogSession = _G.LogSession or nil
 local HTMLTemplate = [[
@@ -342,18 +342,18 @@ function logsession.new()
     local self = setmetatable({}, logsession)
     self.SessionStarted = os.date("%d %b %Y, %H:%M:%S")
     self.SessionName = os.date("Session_%Y-%m-%d_%H-%M-%S")
-    self.LogFile = "Mocha/logs/" .. self.SessionName .. ".html"
+    self.LogFile = "MochaHub/logs/" .. self.SessionName .. ".html"
     _G.LogSession = self
     return self
 end
 
 function logsession:InitializeLogs()
-    if not isfolder("Mocha") then
-        makefolder("Mocha")
+    if not isfolder("MochaHub") then
+        makefolder("MochaHub")
     end
 
-    if not isfolder("Mocha/logs") then
-        makefolder("Mocha/logs")
+    if not isfolder("MochaHub/logs") then
+        makefolder("MochaHub/logs")
     end
 
     writefile(
