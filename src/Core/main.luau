@@ -1,3 +1,4 @@
+local RunService = game:GetService("RunService")
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
 local Tabs = {}
@@ -334,6 +335,3 @@ WindUI:Notify({
 })
 
 init(Window, WindUI, "Universal/Settings.luau")
-queueonteleport(game:HttpGet(
-    "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/main.luau"
-))

@@ -1,9 +1,10 @@
 local NecessaryFiles = {
-    "fold.Steve",
-    "fold.Steve/assets",
-    "fold.Steve/Configurations",
-    "fold.Steve/Plugins",
-    "fold.Steve/Logs"
+    "fold.MochaHub",
+    "fold.MochaHub/assets",
+    "fold.MochaHub/Configurations",
+    "fold.MochaHub/Plugins",
+    "fold.MochaHub/Logs",
+    "file.MochaHub/version.json"
 }
 
 for _, v in ipairs(NecessaryFiles) do
@@ -20,25 +21,11 @@ for _, v in ipairs(NecessaryFiles) do
         end
     end
 end
---[[
-local FileFuncts = {}
-
-function FileFuncts.Write(path : string, data : string)
-    if not data then
-        data = "nil"
-    end
-
-    writefile(path, data)
-end
-function FileFuncts.Read(path : string): string?
-    if isfile(path) then
-        return readfile(path), true
-    else
-        return "", false
-    end
-end]]
 
 return function(FileName, Link)
+    local version = readfile("Steve/versions.json")
+
+
     if isfile("Steve/assets/".. FileName) then
         return getcustomasset("Steve/assets/".. FileName)
     else
