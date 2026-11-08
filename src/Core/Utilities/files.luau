@@ -23,9 +23,6 @@ for _, v in ipairs(NecessaryFiles) do
 end
 
 return function(FileName, Link)
-    local version = readfile("Steve/versions.json")
-
-
     if isfile("Steve/assets/".. FileName) then
         return getcustomasset("Steve/assets/".. FileName)
     else

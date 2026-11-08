@@ -97,10 +97,10 @@ end
 -- main window --
 
 local Window = WindUI:CreateWindow({
-    Title = "Steve Hub",
+    Title = "Mocha Hub",
     Icon = FetchAsset("icon.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/icon.png"), -- lucide icon
     Author = "By ChatColours",
-    Folder = "Steve",
+    Folder = "Mocha",
     
     -- ↓ This all is Optional. You can remove it.
     Size = UDim2.fromOffset(580, 460),
