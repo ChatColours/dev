@@ -1,4 +1,5 @@
 local module = {}
+print("logs is loading")
 local logsession = {}
 logsession.__index = logsession
 module.__index = module
