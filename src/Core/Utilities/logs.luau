@@ -14,7 +14,7 @@ local DevWindow = DevConsole:WaitForChild("DevConsoleWindow")
 local DevUI = DevWindow:WaitForChild("DevConsoleUI")
 local MainView = DevUI:FindFirstChild("MainView")
 local ClientLogView = (MainView and MainView:WaitForChild("ClientLog"))
-local icon = getcustomasset("Steve/assets/icon.png")
+local icon = getcustomasset("Mocha/assets/icon.png")
 
 _G.LogSession = _G.LogSession or nil
 local HTMLTemplate = [[
@@ -23,7 +23,7 @@ local HTMLTemplate = [[
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SteveHub - Session Logs</title>
+    <title>Mocha Hub - Session Logs</title>
 
     <style>
         * {
@@ -208,11 +208,11 @@ local HTMLTemplate = [[
             <img
                 src="https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/icon.jpg"
                 class="logo"
-                alt="SteveHub Icon"
+                alt="Mocha Hub Icon"
             >
 
             <div>
-                <h1>SteveHub <span>Logs</span></h1>
+                <h1>Mocha Hub <span>Logs</span></h1>
                 <p>Session diagnostics & activity</p>
             </div>
         </div>
@@ -236,7 +236,7 @@ local HTMLTemplate = [[
 
         <div class="session-info">
             <span>Started: %s</span>
-            <span>SteveHub v2.0</span>
+            <span>Mocha Hub v2.0</span>
         </div>
     </header>
 
@@ -342,18 +342,18 @@ function logsession.new()
     local self = setmetatable({}, logsession)
     self.SessionStarted = os.date("%d %b %Y, %H:%M:%S")
     self.SessionName = os.date("Session_%Y-%m-%d_%H-%M-%S")
-    self.LogFile = "Steve/logs/" .. self.SessionName .. ".html"
+    self.LogFile = "Mocha/logs/" .. self.SessionName .. ".html"
     _G.LogSession = self
     return self
 end
 
 function logsession:InitializeLogs()
-    if not isfolder("Steve") then
-        makefolder("Steve")
+    if not isfolder("Mocha") then
+        makefolder("Mocha")
     end
 
-    if not isfolder("Steve/logs") then
-        makefolder("Steve/logs")
+    if not isfolder("Mocha/logs") then
+        makefolder("Mocha/logs")
     end
 
     writefile(
@@ -370,7 +370,7 @@ function module:Log(message: string, logType: string?, customColor: Color3?)
     local formattedMessage = FormatTags(tostring(message))
 
     local formatted = string.format(
-        '<font color="#71717A">[%s]</font> <font color="#A78BFA"><b>[STEVEHUB]</b></font> <font color="#%s"><b>[%s]</b></font> %s',
+        '<font color="#71717A">[%s]</font> <font color="#A78BFA"><b>[MOCHAHUB]</b></font> <font color="#%s"><b>[%s]</b></font> %s',
         timestamp,
         hex,
         logType,
