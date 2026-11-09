@@ -10,11 +10,11 @@ local LastRestoredView = nil
 local maxLogs = 300
 
 local CoreGui = game:GetService("CoreGui")
-local DevConsole = CoreGui:WaitForChild("DevConsoleMaster")
-local DevWindow = DevConsole:WaitForChild("DevConsoleWindow")
-local DevUI = DevWindow:WaitForChild("DevConsoleUI")
-local MainView = DevUI:FindFirstChild("MainView")
-local ClientLogView = (MainView and MainView:WaitForChild("ClientLog"))
+local DevConsole = CoreGui:FindFirstChild("DevConsoleMaster")
+local DevWindow = DevConsole and DevConsole:WaitForChild("DevConsoleWindow")
+local DevUI = DevWindow and DevWindow:WaitForChild("DevConsoleUI")
+local MainView = DevUI and DevUI:WaitForChild("MainView")
+local ClientLogView = MainView and MainView:WaitForChild("ClientLog")
 local icon = getcustomasset("MochaHub/assets/icon.png")
 
 _G.LogSession = _G.LogSession or nil

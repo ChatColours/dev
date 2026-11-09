@@ -7,7 +7,9 @@ local reasons = {
     ["KEY_EXPIRED"] = "The key has expired and is not available.",
     ["HWID_MISMATCH"] = "The key is linked to a different HWID",
     ["HWID_BANNED"] = "The HWID is banned from using this key.",
-    ["INVALID_TIMESTAMP"] = "The timestamp provided is invalid."
+    ["INVALID_TIMESTAMP"] = "The timestamp provided is invalid.",
+    ["ROBLOX_BANNED"] = "This account has been banned.",
+    ["MEMBER_BANNED"] = "The user which generated this key is banned."
 }
 
 local function checkStructure(data)

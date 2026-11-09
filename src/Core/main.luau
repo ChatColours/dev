@@ -1,7 +1,7 @@
 
 local RunService = game:GetService("RunService")
-local Version = "1.6.41"
-local WindUI = loadstring(game:HttpGet("raw.githubusercontent.com/ChatColours/dev/refs/heads/main/WindUI/main.lua"))()
+
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/download/1.6.63/main.lua"))()
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
 local Tabs = {}
 

@@ -68,6 +68,14 @@ return function(Window, WindUI)
         end
     })
 
+    Tab:Keybind({
+        Title = "UI Toggle Keybind",
+        Value = "RightShift", -- default key
+        Callback = function(key)
+            Window:SetToggleKey(Enum.KeyCode[key])
+        end
+    })
+
     Tab:Divider()
 
     Tab:Input({
