@@ -1,5 +1,7 @@
+
 local RunService = game:GetService("RunService")
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local Version = "1.6.41"
+local WindUI = loadstring(game:HttpGet("raw.githubusercontent.com/ChatColours/dev/refs/heads/main/WindUI/main.lua"))()
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
 local Tabs = {}
 
@@ -9,23 +11,21 @@ local Version = Loader.Require("src/Core/Utilities/version.luau")
 local Logs = Loader.Require("src/Core/Utilities/logs.luau")
 local ThemesLoader = Loader.Require("src/misc/Themes.luau")
 
+local Flavors = ThemesLoader.Flavors
+local CurrentTheme = "Catppuccin Mocha"
+
 local function LoadPlugin(Path, Window, WindUI)
     local Success, Result = pcall(function()
         local Chunk, LoadError = loadfile(Path)
-
         if not Chunk then
             Logs:Log(`Failed to load plugin: {Path} -> {LoadError}`, "ERROR")
         end
-
         local Plugin = Chunk()
-
         if type(Plugin) ~= "function" then
             Logs:Log(`Plugin must return a function: {Path}`, "WARN")
         end
-
         return Plugin(Window, WindUI)
     end)
-
     if Success then
         Logs:Log(`Successfully executed plugin: {Path}`, "SUCCESS")
         return true, Result
@@ -43,14 +43,12 @@ local SupportedGames = {
             ["Overpowered.luau"] = ""
         }
     },
-
     [86799185313399] = {
         Folder = "PatrolCompton",
         Tabs = {
             ["cars.luau"] = ""
         }
     },
-
     [155615604] = {
         Folder = "PrisonLife",
         Tabs = {
@@ -58,7 +56,6 @@ local SupportedGames = {
         }
     }
 }
-
 local function SafeRead(path : string)
     if isfile(path) then
         return readfile(path)
@@ -69,7 +66,6 @@ local function SafeRead(path : string)
 end
 
 -- function checking --
-
 local ExeFunctions = {
     ["hookfunction"] = type(hookfunction) == "function",
     ["hookmetamethod"] = type(hookmetamethod) == "function",
@@ -85,23 +81,20 @@ local function GetFailedAndPassed()
     local pass, fail = 0, 0
     for i, v in pairs(ExeFunctions) do
         if v == true then
-            pass += 1 
+            pass += 1
         else
             fail += 1
         end
     end
-
     return pass, fail
 end
 
 -- main window --
-
 local Window = WindUI:CreateWindow({
     Title = "Mocha Hub",
     Icon = FetchAsset("icon.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/icon.png"), -- lucide icon
     Author = "By ChatColours",
     Folder = "Mocha",
-    
     -- ↓ This all is Optional. You can remove it.
     Size = UDim2.fromOffset(580, 460),
     MinSize = Vector2.new(560, 350),
@@ -122,6 +115,7 @@ local Window = WindUI:CreateWindow({
         end,
     },
 })
+
 _G.ConfigManager = Window.ConfigManager
 
 Window:Tag({
@@ -130,6 +124,7 @@ Window:Tag({
     Color = Color3.fromHex("#30ff6a"),
     Radius = 13, -- from 0 to 13
 })
+
 Window:Tag({
     Title = (SupportedGames[game.PlaceId] and "Supported Game") or "Unsupported Game",
     Icon = "gamepad-2",
@@ -164,71 +159,169 @@ local ReadMe = Window:Tab({
     Icon = "file-text", -- optional
     Locked = false,
 })
+
+ReadMe:Image({
+    Image = "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/banner.png",
+    AspectRatio = "16:9",
+    Radius = 12,
+})
+
 local passedFunctions, failedFunctions = GetFailedAndPassed()
 local supportedFunctionstxt = `Your executor, {identifyexecutor()}, supports {tostring(passedFunctions)} out of {tostring(passedFunctions + failedFunctions)} \n \n`
-
 for i, v in pairs(ExeFunctions) do
     supportedFunctionstxt ..= i .. ": " .. (v == true and `<font color="rgb(0,255,0)">✓</font>` or "❌") .. "\n"
 end
 
-ReadMe:Paragraph({
+local function RichText(Text, Color, Size, Bold, Italic)
+    local Result = tostring(Text)
+    if Bold then
+        Result = "<b>" .. Result .. "</b>"
+    end
+    if Italic then
+        Result = "<i>" .. Result .. "</i>"
+    end
+    if Size then
+        Result = string.format(
+            '<font size="%d">%s</font>',
+            Size,
+            Result
+        )
+    end
+    if Color then
+        Result = string.format(
+            '<font color="%s">%s</font>',
+            Color,
+            Result
+        )
+    end
+    return Result
+end
+
+local function GetPalette(ThemeName)
+    local Name = ThemeName:gsub("^Catppuccin ", "")
+    return Flavors[Name] or Flavors.Mocha
+end
+
+local function GenerateReadMe(ThemeName)
+    local P = GetPalette(ThemeName)
+    local function T(Text, Color, Size, Bold, Italic)
+        return RichText(Text, P[Color], Size, Bold, Italic)
+    end
+    local Lines = {
+        T("Welcome to SteveHub!", "accent", 22, true),
+        "",
+        T("SteveHub", "accent", nil, true)
+            .. " is a free, open-source Roblox script hub designed to provide both "
+            .. T("universal utilities", "text", nil, true)
+            .. " and "
+            .. T("game-specific features", "text", nil, true)
+            .. " in one convenient interface.",
+        "",
+        "Our goal is to create a powerful, lightweight, and modular experience that is easy to use, regularly improved, and accessible to everyone.",
+        "",
+        T("What We Offer", "accent", 17, true),
+        T(table.concat({
+            "• Universal features across supported experiences",
+            "• Dedicated scripts for individual games",
+            "• Anti-cheat bypasses",
+            "• A clean and customisable interface",
+            "• Modular systems for improved maintainability",
+            "• Regular improvements and new functionality",
+            "• Free and open-source development",
+        }, "\n"), "text"),
+        "",
+        T("Supported Games", "accent", 17, true),
+        T("✓", "green") .. " The Chosen One",
+        T("✓", "green") .. " Patrol Compton",
+        "",
+        T(
+            "More experiences and features are planned for future updates.",
+            "subtext",
+            nil,
+            false,
+            true
+        ),
+        "",
+        T("Executor Compatibility", "accent", 17, true),
+        "SteveHub supports various executors, although certain advanced functions and bypasses require higher-level executors such as "
+            .. T("Volt", "accent", nil, true)
+            .. ".",
+        "",
+        "Some features may be unavailable depending on your executor's supported functions.",
+        "",
+        T("Plugin Support", "accent", 17, true),
+        "SteveHub supports "
+            .. T("community-created plugins", "accent", nil, true)
+            .. ", allowing users to extend the hub with custom features, utilities, and additional functionality.",
+        "",
+        "Plugins can be developed by anyone and shared with the community, making SteveHub even more flexible and customisable.",
+        "",
+        T("Installing Plugins", "accent", 15, true),
+        "To install a plugin, place its "
+            .. T(".luau", "accent", nil, true)
+            .. " file inside the following directory:",
+        "",
+        T("Steve/Plugins/", "accent", nil, true),
+        "",
+        T(
+            "This folder is located inside your executor's workspace.",
+            "subtext",
+            nil,
+            false,
+            true
+        ),
+        "",
+        "SteveHub will automatically detect and load plugins found in this directory.",
+        "",
+        T(
+            "Only install plugins from developers you trust, as plugins can execute their own code.",
+            "subtext",
+            nil,
+            false,
+            true
+        ),
+        "",
+        T("Important Information", "accent", 17, true),
+        T(table.concat({
+            "• Features may change or become unavailable after game updates.",
+            "• Some functions are experimental and may contain bugs.",
+            "• Use SteveHub responsibly and at your own discretion.",
+        }, "\n"), "text"),
+        "",
+        T(
+            "Built for versatility. Designed for simplicity.",
+            "subtext",
+            nil,
+            false,
+            true
+        ),
+        "",
+        T("SteveHub", "accent", nil, true),
+        T(
+            "Created and maintained by ChatColours.",
+            "subtext",
+            nil,
+            false,
+            true
+        ),
+    }
+    return table.concat(Lines, "\n")
+end
+
+local function GenerateSupportedFunctions(ThemeName)
+    local P = GetPalette(ThemeName)
+    local text = `Your executor, {identifyexecutor()}, supports {passedFunctions} out of {passedFunctions + failedFunctions}\n\n`
+    for name, supported in pairs(ExeFunctions) do
+        local mark = supported and RichText("✓", P.green) or RichText("✗", P.red)
+        text ..= name .. ": " .. mark .. "\n"
+    end
+    return text
+end
+
+local Information = ReadMe:Paragraph({
     Title = "Information",
-    Desc = 
-[[
-<font size="22" color="#D9B78C"><b>Welcome to SteveHub!</b></font>
-
-<font color="#E0D5C5">SteveHub</font> is a free, open-source Roblox script hub designed to provide both <b>universal utilities</b> and <b>game-specific features</b> in one convenient interface.
-
-Our goal is to create a powerful, lightweight, and modular experience that is easy to use, regularly improved, and accessible to everyone.
-
-<font size="17" color="#C6A47D"><b>What We Offer</b></font>
-<font color="#CFC5B8">• Universal features across supported experiences
-• Dedicated scripts for individual games
-• Anti-cheat bypasses
-• A clean and customisable interface
-• Modular systems for improved maintainability
-• Regular improvements and new functionality
-• Free and open-source development</font>
-
-<font size="17" color="#C6A47D"><b>Supported Games</b></font>
-<font color="#A6C48A">✓</font> The Chosen One
-<font color="#A6C48A">✓</font> Patrol Compton
-
-<font color="#A99B8A"><i>More experiences and features are planned for future updates.</i></font>
-
-<font size="17" color="#C6A47D"><b>Executor Compatibility</b></font>
-SteveHub supports various executors, although certain advanced functions and bypasses require higher-level executors such as <font color="#D9B78C"><b>Volt</b></font>.
-
-Some features may be unavailable depending on your executor's supported functions.
-
-<font size="17" color="#C6A47D"><b>Plugin Support</b></font>
-<font color="#CFC5B8">SteveHub supports <font color="#D9B78C"><b>community-created plugins</b></font>, allowing users to extend the hub with custom features, utilities, and additional functionality.
-
-Plugins can be developed by anyone and shared with the community, making SteveHub even more flexible and customisable.</font>
-
-<font size="15" color="#C6A47D"><b>Installing Plugins</b></font>
-<font color="#CFC5B8">To install a plugin, place its <font color="#D9B78C"><b>.luau</b></font> file inside the following directory:</font>
-
-<font color="#D9B78C"><b>Steve/Plugins/</b></font>
-
-<font color="#A99B8A"><i>This folder is located inside your executor's workspace.</i></font>
-
-<font color="#CFC5B8">SteveHub will automatically detect and load plugins found in this directory.</font>
-
-<font color="#A99B8A"><i>Only install plugins from developers you trust, as plugins can execute their own code.</i></font>
-
-<font size="17" color="#C6A47D"><b>Important Information</b></font>
-<font color="#CFC5B8">• Features may change or become unavailable after game updates.
-• Some functions are experimental and may contain bugs.
-• Use SteveHub responsibly and at your own discretion.</font>
-
-<font color="#A99B8A"><i>Built for versatility. Designed for simplicity.</i></font>
-
-<font color="#D9B78C"><b>SteveHub</b></font>
-<font color="#A99B8A"><i>Created and maintained by ChatColours.</i></font>
-]]
-,
-    Color = Color3.fromHex("#3B3027"),
+    Desc = GenerateReadMe(CurrentTheme),
+    Color = Color3.fromHex(GetPalette(CurrentTheme).surface),
     Image = "",
     ImageSize = 30,
     Thumbnail = "",
@@ -238,10 +331,10 @@ Plugins can be developed by anyone and shared with the community, making SteveHu
     }
 })
 
-ReadMe:Paragraph({
+local SupportedFunctions = ReadMe:Paragraph({
     Title = "Supported Functions",
-    Desc = supportedFunctionstxt,
-    Color = Color3.fromHex("#3B3027"),
+    Desc = GenerateSupportedFunctions(CurrentTheme),
+    Color = Color3.fromHex(GetPalette(CurrentTheme).surface),
     Image = "",
     ImageSize = 30,
     Thumbnail = "",
@@ -249,6 +342,22 @@ ReadMe:Paragraph({
     Locked = false,
     Buttons = {
     }
+})
+
+local function UpdateReadMe(themeName)
+    CurrentTheme = themeName
+    Information:SetDesc(GenerateReadMe(themeName))
+    SupportedFunctions:SetDesc(GenerateSupportedFunctions(themeName))
+end
+
+ReadMe:Dropdown({
+    Title = "Catppuccin Theme",
+    Values = {"Catppuccin Latte", "Catppuccin Frappe", "Catppuccin Macchiato", "Catppuccin Mocha"},
+    Value = CurrentTheme,
+    Callback = function(value)
+        WindUI:SetTheme(value)
+        UpdateReadMe(value)
+    end,
 })
 
 Window:Divider()
@@ -263,23 +372,19 @@ init(Window, WindUI, "Universal/Visuals.luau")
 init(Window, WindUI, "Universal/Servers.luau")
 init(Window, WindUI, "Universal/Scripts.luau")
 init(Window, WindUI, "Universal/Safety.luau")
-local supported = SupportedGames[game.PlaceId]
 
+local supported = SupportedGames[game.PlaceId]
 if supported then
     for filename, requiredTab in pairs(supported.Tabs) do
         local path = supported.Folder .. "/" .. filename
-
         local tab = nil
-
         if requiredTab ~= "" then
             tab = Tabs[requiredTab]
-
             if not tab then
                 Logs:Log(`Missing required tab: {requiredTab} for {path}`, "WARN")
                 continue
             end
         end
-
         init(Window, WindUI, path, tab)
     end
 end
@@ -308,7 +413,6 @@ WindUI:Popup({
                         })
                         continue
                     end
-
                     local plugin, res = LoadPlugin(pluginPath, Window, WindUI)
                     if not plugin and res then
                         Logs:Log(`Failed to load plugin: {pluginPath}: {res}`, "ERROR")
