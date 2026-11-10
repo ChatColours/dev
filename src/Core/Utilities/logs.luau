@@ -419,7 +419,7 @@ local function RestoreLogs()
     end
 end
 
-if not _G.UpdateConnection then
+if not _G.UpdateConnection and DevUI then
     _G.UpdateConnection = DevUI.ChildAdded:Connect(function(child)
         if child.Name == "MainView" then
             MainView = child
@@ -427,6 +427,23 @@ if not _G.UpdateConnection then
             ClientLogView.AutomaticCanvasSize = Enum.AutomaticSize.XY
             task.defer(function()
                 RestoreLogs()
+            end)
+        end
+    end)
+else
+    local connection
+    connection = game:GetService("CoreGui").ChildAdded:Connect(function(child)
+        if child.Name == "DevConsoleMaster" then
+            _G.UpdateConnection = DevUI.ChildAdded:Connect(function(child)
+                if child.Name == "MainView" then
+                    MainView = child
+                    ClientLogView = MainView:WaitForChild("ClientLog")
+                    ClientLogView.AutomaticCanvasSize = Enum.AutomaticSize.XY
+                    task.defer(function()
+                        RestoreLogs()
+                    end)
+                    connection:Disconnect()
+                end
             end)
         end
     end)
