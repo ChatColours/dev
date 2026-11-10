@@ -17,24 +17,22 @@ function Element:New(Config)
 		Yaw = Config.Yaw or 0,
 		Pitch = Config.Pitch or 0,
 	}
-	local Main = Creator.NewRoundFrame(Config.Radius or Config.Window.ElementConfig.UICorner, "Squircle", {
-		Size = UDim2.new(1, 0, 0, Viewport.Height),
-		Parent = Config.Parent,
-		ThemeTag = { ImageColor3 = "ViewportBackground", ImageTransparency = "ViewportBackgroundTransparency" },
-	}, {
-		New("UICorner", { CornerRadius = UDim.new(0, Config.Radius or Config.Window.ElementConfig.UICorner) }),
-	})
 	local Frame = New("ViewportFrame", {
 		Name = "Viewport",
-		Parent = Main,
-		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundTransparency = 1,
+		Parent = Config.Parent,
+		Size = UDim2.new(1, 0, 0, Viewport.Height),
+		BorderSizePixel = 0,
+		ThemeTag = {
+			BackgroundColor3 = "ViewportBackground",
+			BackgroundTransparency = "ViewportBackgroundTransparency",
+		},
 		Active = Viewport.Interactive,
 		ClipsDescendants = true,
 		Ambient = Config.Ambient or Color3.fromRGB(180, 180, 180),
 		LightColor = Config.LightColor or Color3.new(1, 1, 1),
 		LightDirection = Config.LightDirection or Vector3.new(-1, -1, -1),
-	}, { New("UICorner", { CornerRadius = UDim.new(0, Config.Radius or Config.Window.ElementConfig.UICorner) }) })
+	})
+	local Main = Frame
 	local World = New("WorldModel", { Parent = Frame })
 	local Camera = Config.Camera and Config.Camera:Clone() or New("Camera", { FieldOfView = Config.FieldOfView or 70 })
 	Camera.Parent = Frame
@@ -177,7 +175,7 @@ function Element:New(Config)
 				and Input.UserInputType == Enum.UserInputType.MouseMovement)) then
 			local Delta = Input.Position - LastPosition
 			LastPosition = Input.Position
-			Viewport:SetAngles(Viewport.Yaw - Delta.X * Viewport.RotationSpeed, Viewport.Pitch - Delta.Y * Viewport.RotationSpeed)
+			Viewport:SetAngles(Viewport.Yaw - Delta.X * Viewport.RotationSpeed, Viewport.Pitch + Delta.Y * Viewport.RotationSpeed)
 		end
 	end)
 	Connect(UserInputService.InputEnded, function(Input)

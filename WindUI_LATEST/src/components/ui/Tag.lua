@@ -9,7 +9,7 @@ function Tag:New(TagConfig, Parent)
 		Title = TagConfig.Title or "Tag",
 		Icon = TagConfig.Icon,
 		Color = TagConfig.Color or Color3.fromHex("#315dff"),
-		Radius = TagConfig.Radius or 999,
+		Radius = math.min(TagConfig.Radius or 999, (TagConfig.Height or 26) / 2),
 		Border = TagConfig.Border or false,
 
 		TagFrame = nil,
@@ -56,30 +56,21 @@ function Tag:New(TagConfig, Parent)
 		end
 	end
 
-	local TagFrame = Creator.NewRoundFrame(TagModule.Radius, "Squircle", {
+	local TagFrame = New("Frame", {
 		AutomaticSize = "X",
 		Size = UDim2.new(0, 0, 0, TagModule.Height),
 		Parent = Parent,
 		LayoutOrder = TagConfig.Order or 0,
-		ImageTransparency = TagConfig.BackgroundTransparency or 0,
-		ImageColor3 = typeof(TagModule.Color) == "Color3" and TagModule.Color
+		BackgroundTransparency = TagConfig.BackgroundTransparency or 0,
+		BackgroundColor3 = typeof(TagModule.Color) == "Color3" and TagModule.Color
 			or typeof(TagModule.Color) == "table" and Color3.new(1, 1, 1)
 			or nil,
 		ThemeTag = typeof(TagModule.Color) == "string" and {
-			ImageColor3 = TagModule.Color,
+			BackgroundColor3 = TagModule.Color,
 		},
 	}, {
 		New("UICorner", { CornerRadius = UDim.new(0, TagModule.Radius) }),
 		BackgroundGradient,
-		Creator.NewRoundFrame(TagModule.Radius + 1, "SquircleGlass", {
-			Size = UDim2.new(1, 1, 1, 1),
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 0.5, 0),
-			ThemeTag = {
-				ImageColor3 = "White",
-			},
-			ImageTransparency = 0.75,
-		}),
 		New("Frame", {
 			Size = UDim2.new(0, 0, 1, 0),
 			AutomaticSize = "X",
@@ -103,6 +94,7 @@ function Tag:New(TagConfig, Parent)
 	if TagModule.Border then
 		New("UIStroke", {
 			Parent = TagFrame,
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 			Thickness = TagConfig.BorderThickness or 1,
 			Transparency = TagConfig.BorderTransparency or 0.55,
 			Color = typeof(TagConfig.BorderColor) == "Color3" and TagConfig.BorderColor or nil,
@@ -129,7 +121,7 @@ function Tag:New(TagConfig, Parent)
 			for k, v in next, color do gradient[k] = v end
 			local avgColor = Creator.GetAverageColor(gradient)
 			Tween(TagTitle, 0.06, { TextColor3 = TagConfig.TextColor or Creator.GetTextColorForHSB(avgColor) }):Play()
-			Tween(TagFrame, 0.06, { ImageColor3 = Color3.new(1, 1, 1) }):Play()
+			Tween(TagFrame, 0.06, { BackgroundColor3 = Color3.new(1, 1, 1) }):Play()
 		else
 			local gradient = TagFrame:FindFirstChildOfClass("UIGradient")
 			if gradient then gradient:Destroy() end
@@ -138,7 +130,7 @@ function Tag:New(TagConfig, Parent)
 			if TagIcon then
 				Tween(TagIcon.ImageLabel, 0.06, { ImageColor3 = TagConfig.IconColor or Creator.GetTextColorForHSB(resolved) }):Play()
 			end
-			Tween(TagFrame, 0.06, { ImageColor3 = resolved }):Play()
+			Tween(TagFrame, 0.06, { BackgroundColor3 = resolved }):Play()
 		end
 
 		return TagModule
@@ -187,7 +179,7 @@ function Tag:New(TagConfig, Parent)
 			local textColor = Creator.GetTextColorForHSB(color)
 			TagTitle.TextColor3 = TagConfig.TextColor or textColor
 			if TagIcon then TagIcon.ImageLabel.ImageColor3 = TagConfig.IconColor or textColor end
-			if typeof(TagModule.Color) == "string" then TagFrame.ImageColor3 = color end
+			if typeof(TagModule.Color) == "string" then TagFrame.BackgroundColor3 = color end
 		end
 	end)
 

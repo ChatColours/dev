@@ -432,7 +432,7 @@ if not _G.UpdateConnection and DevUI then
     end)
 else
     local connection
-    connection = game:GetService("CoreGui").ChildAdded:Connect(function(child)
+    connection = game.CoreGui.ChildAdded:Connect(function(child)
         if child.Name == "DevConsoleMaster" then
             _G.UpdateConnection = DevUI.ChildAdded:Connect(function(child)
                 if child.Name == "MainView" then

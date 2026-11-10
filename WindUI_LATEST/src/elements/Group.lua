@@ -14,15 +14,15 @@ function Element:New(Config)
 		Elements = {},
 		Layout = Config.Layout or "Vertical",
 	}
-	local Card = Creator.NewRoundFrame(Config.Radius or Window.ElementConfig.UICorner, "Squircle", {
+	local Card = New("Frame", {
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = "Y",
 		Parent = Config.Parent,
-		ImageColor3 = typeof(Config.BackgroundColor) == "Color3" and Config.BackgroundColor or nil,
-		ImageTransparency = Config.BackgroundTransparency,
+		BackgroundColor3 = typeof(Config.BackgroundColor) == "Color3" and Config.BackgroundColor or nil,
+		BackgroundTransparency = Config.BackgroundTransparency,
 		ThemeTag = typeof(Config.BackgroundColor) == "Color3" and nil or {
-			ImageColor3 = Config.BackgroundColor or "GroupBackground",
-			ImageTransparency = Config.BackgroundTransparency and nil or "GroupBackgroundTransparency",
+			BackgroundColor3 = Config.BackgroundColor or "GroupBackground",
+			BackgroundTransparency = Config.BackgroundTransparency and nil or "GroupBackgroundTransparency",
 		},
 	}, {
 		New("UICorner", { CornerRadius = UDim.new(0, Config.Radius or Window.ElementConfig.UICorner) }),
@@ -40,6 +40,7 @@ function Element:New(Config)
 	})
 	local Border = New("UIStroke", {
 		Parent = Card,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 		Thickness = Config.BorderThickness or 1,
 		Transparency = Config.Border == false and 1 or (Config.BorderTransparency or 0.8),
 		Color = typeof(Config.BorderColor) == "Color3" and Config.BorderColor or nil,
@@ -117,8 +118,8 @@ function Element:New(Config)
 		Header.Visible = Config.Header ~= false and (Group.Title ~= nil or Group.Desc ~= nil or Group.Icon ~= nil)
 	end
 	function Group:SetBackground(Color, Transparency)
-		if Color then Card.ImageColor3 = Color end
-		if Transparency then Card.ImageTransparency = Transparency end
+		if Color then Card.BackgroundColor3 = Color end
+		if Transparency then Card.BackgroundTransparency = Transparency end
 	end
 	return Group.__type, Group
 end

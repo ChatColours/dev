@@ -286,11 +286,15 @@ return function(Config)
 	end
 
 	for _, TagConfig in next, Config.Tags or {} do
-		if not TagsFrame.Visible then
-			TagsFrame.Visible = true
-			TextFrame.Space.Visible = not SideTags
+		if Element.TagsPosition == "Topbar" then
+			Config.Window:Tag(TagConfig)
+		else
+			if not TagsFrame.Visible then
+				TagsFrame.Visible = true
+				TextFrame.Space.Visible = not SideTags
+			end
+			TagModule:New(TagConfig, TagsFrame)
 		end
-		TagModule:New(TagConfig, TagsFrame)
 	end
 
 	Creator.AddSignal(
@@ -480,10 +484,67 @@ return function(Config)
 		}),
 	}, true, true)
 
+	-- The sliced squircle assets can expose their square texture corners when a
+	-- card changes height. Native GUI corners stay correct at every size.
+	if not Config.Window.ConnectedElements then
+		local NativeMain = New("TextButton", {
+			Size = Main.Size,
+			AutomaticSize = Main.AutomaticSize,
+			Parent = Config.Parent,
+			BackgroundColor3 = Main.ImageColor3,
+			BackgroundTransparency = Main.ImageTransparency,
+			BorderSizePixel = 0,
+			AutoButtonColor = false,
+			Text = "",
+			ThemeTag = not Element.Color and {
+				BackgroundColor3 = Config.Window.NewElements and "ElementBackground" or "Text",
+				BackgroundTransparency = Config.Window.NewElements and "ElementBackgroundTransparency" or nil,
+			} or nil,
+		}, {
+			New("UICorner", { CornerRadius = UDim.new(0, Element.UICorner) }),
+		})
+		for _, Child in ipairs(Main:GetChildren()) do
+			Child.Parent = NativeMain
+		end
+		Main:Destroy()
+		Main = NativeMain
+
+		local NativeLocked = New("Frame", {
+			Size = Locked.Size,
+			Parent = ElementFullFrame,
+			BackgroundColor3 = Color3.new(0, 0, 0),
+			BackgroundTransparency = 0.25,
+			BorderSizePixel = 0,
+			Visible = false,
+			Active = false,
+		}, {
+			New("UICorner", { CornerRadius = UDim.new(0, Element.UICorner) }),
+		})
+		for _, Child in ipairs(Locked:GetChildren()) do
+			Child.Parent = NativeLocked
+		end
+		Locked:Destroy()
+		Locked = NativeLocked
+		Hover.Visible = false
+		HoverOutline.Visible = false
+	end
+
 	Element.UIElements.Main = Main
 	Element.UIElements.Locked = Locked
 
-	if Element.Hover then
+	if Element.Hover and not Config.Window.ConnectedElements then
+		local BaseTransparency = Main.BackgroundTransparency
+		Creator.AddSignal(Main.MouseEnter, function()
+			if CanHover then
+				BaseTransparency = Main.BackgroundTransparency
+				Tween(Main, 0.12, { BackgroundTransparency = math.max(0, BaseTransparency - 0.06) }):Play()
+			end
+		end)
+		Creator.AddSignal(Main.MouseLeave, function()
+			Tween(Main, 0.12, { BackgroundTransparency = BaseTransparency }):Play()
+		end)
+	end
+	if Element.Hover and Config.Window.ConnectedElements then
 		Creator.AddSignal(Main.MouseEnter, function()
 			if CanHover then
 				--Tween(Main, 0.12, { ImageTransparency = Element.Color and 0.15 or 0.9 }):Play()
@@ -669,6 +730,22 @@ return function(Config)
 	end
 
 	function Element:Highlight()
+		if not Config.Window.ConnectedElements then
+			local Stroke = Main:FindFirstChild("HighlightStroke")
+			if not Stroke then
+				Stroke = New("UIStroke", {
+					Name = "HighlightStroke",
+					Parent = Main,
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+					Thickness = 2,
+					Transparency = 1,
+					ThemeTag = { Color = "Primary" },
+				})
+			end
+			Stroke.Transparency = 0.15
+			Tween(Stroke, 0.75, { Transparency = 1 }):Play()
+			return
+		end
 		local OutlineGradient = New("UIGradient", {
 			Color = ColorSequence.new({
 				ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
@@ -726,7 +803,7 @@ return function(Config)
 	end
 
 	function Element.UpdateShape(Tab)
-		if Config.Window.NewElements then
+		if Config.Window.NewElements and Config.Window.ConnectedElements then
 			local newShape = Creator:GetElementPosition(
 				Tab.Elements,
 				Element.Index,

@@ -28899,7 +28899,7 @@ local ah={
 Title=af.Title or"Tag",
 Icon=af.Icon,
 Color=af.Color or Color3.fromHex"#315dff",
-Radius=af.Radius or 999,
+Radius=math.min(af.Radius or 999,(af.Height or 26)/2),
 Border=af.Border or false,
 
 TagFrame=nil,
@@ -28946,30 +28946,21 @@ ai.ImageLabel.ImageColor3=ab.GetTextColorForHSB(ab.GetAverageColor(ak))
 end
 end
 
-local al=ab.NewRoundFrame(ah.Radius,"Squircle",{
+local al=ac("Frame",{
 AutomaticSize="X",
 Size=UDim2.new(0,0,0,ah.Height),
 Parent=ag,
 LayoutOrder=af.Order or 0,
-ImageTransparency=af.BackgroundTransparency or 0,
-ImageColor3=typeof(ah.Color)=="Color3"and ah.Color
+BackgroundTransparency=af.BackgroundTransparency or 0,
+BackgroundColor3=typeof(ah.Color)=="Color3"and ah.Color
 or typeof(ah.Color)=="table"and Color3.new(1,1,1)
 or nil,
 ThemeTag=typeof(ah.Color)=="string"and{
-ImageColor3=ah.Color,
+BackgroundColor3=ah.Color,
 },
 },{
 ac("UICorner",{CornerRadius=UDim.new(0,ah.Radius)}),
 ak,
-ab.NewRoundFrame(ah.Radius+1,"SquircleGlass",{
-Size=UDim2.new(1,1,1,1),
-AnchorPoint=Vector2.new(0.5,0.5),
-Position=UDim2.new(0.5,0,0.5,0),
-ThemeTag={
-ImageColor3="White",
-},
-ImageTransparency=0.75,
-}),
 ac("Frame",{
 Size=UDim2.new(0,0,1,0),
 AutomaticSize="X",
@@ -28993,6 +28984,7 @@ ah.TagFrame=al
 if ah.Border then
 ac("UIStroke",{
 Parent=al,
+ApplyStrokeMode=Enum.ApplyStrokeMode.Border,
 Thickness=af.BorderThickness or 1,
 Transparency=af.BorderTransparency or 0.55,
 Color=typeof(af.BorderColor)=="Color3"and af.BorderColor or nil,
@@ -29019,7 +29011,7 @@ local ao=al:FindFirstChildOfClass"UIGradient"or ac("UIGradient",{Parent=al})
 for ap,aq in next,an do ao[ap]=aq end
 local ap=ab.GetAverageColor(ao)
 ad(aj,0.06,{TextColor3=af.TextColor or ab.GetTextColorForHSB(ap)}):Play()
-ad(al,0.06,{ImageColor3=Color3.new(1,1,1)}):Play()
+ad(al,0.06,{BackgroundColor3=Color3.new(1,1,1)}):Play()
 else
 local ao=al:FindFirstChildOfClass"UIGradient"
 if ao then ao:Destroy()end
@@ -29028,7 +29020,7 @@ ad(aj,0.06,{TextColor3=af.TextColor or ab.GetTextColorForHSB(ap)}):Play()
 if ai then
 ad(ai.ImageLabel,0.06,{ImageColor3=af.IconColor or ab.GetTextColorForHSB(ap)}):Play()
 end
-ad(al,0.06,{ImageColor3=ap}):Play()
+ad(al,0.06,{BackgroundColor3=ap}):Play()
 end
 
 return ah
@@ -29077,7 +29069,7 @@ if ao then
 local ap=ab.GetTextColorForHSB(ao)
 aj.TextColor3=af.TextColor or ap
 if ai then ai.ImageLabel.ImageColor3=af.IconColor or ap end
-if typeof(ah.Color)=="string"then al.ImageColor3=ao end
+if typeof(ah.Color)=="string"then al.BackgroundColor3=ao end
 end
 end)
 
@@ -30202,11 +30194,15 @@ end
 end
 
 for av,aw in next,ag.Tags or{}do
+if ah.TagsPosition=="Topbar"then
+ag.Window:Tag(aw)
+else
 if not at.Visible then
 at.Visible=true
 as.Space.Visible=not au
 end
 af:New(aw,at)
+end
 end
 
 aa.AddSignal(
@@ -30396,10 +30392,67 @@ PaddingBottom=UDim.new(0,ah.UIPadding),
 }),
 },true,true)
 
+
+
+if not ag.Window.ConnectedElements then
+local l=ab("TextButton",{
+Size=h.Size,
+AutomaticSize=h.AutomaticSize,
+Parent=ag.Parent,
+BackgroundColor3=h.ImageColor3,
+BackgroundTransparency=h.ImageTransparency,
+BorderSizePixel=0,
+AutoButtonColor=false,
+Text="",
+ThemeTag=not ah.Color and{
+BackgroundColor3=ag.Window.NewElements and"ElementBackground"or"Text",
+BackgroundTransparency=ag.Window.NewElements and"ElementBackgroundTransparency"or nil,
+}or nil,
+},{
+ab("UICorner",{CornerRadius=UDim.new(0,ah.UICorner)}),
+})
+for m,p in ipairs(h:GetChildren())do
+p.Parent=l
+end
+h:Destroy()
+h=l
+
+local m=ab("Frame",{
+Size=ay.Size,
+Parent=ax,
+BackgroundColor3=Color3.new(0,0,0),
+BackgroundTransparency=0.25,
+BorderSizePixel=0,
+Visible=false,
+Active=false,
+},{
+ab("UICorner",{CornerRadius=UDim.new(0,ah.UICorner)}),
+})
+for p,r in ipairs(ay:GetChildren())do
+r.Parent=m
+end
+ay:Destroy()
+ay=m
+f.Visible=false
+d.Visible=false
+end
+
 ah.UIElements.Main=h
 ah.UIElements.Locked=ay
 
-if ah.Hover then
+if ah.Hover and not ag.Window.ConnectedElements then
+local l=h.BackgroundTransparency
+aa.AddSignal(h.MouseEnter,function()
+if am then
+l=h.BackgroundTransparency
+ad(h,0.12,{BackgroundTransparency=math.max(0,l-0.06)}):Play()
+end
+end)
+aa.AddSignal(h.MouseLeave,function()
+ad(h,0.12,{BackgroundTransparency=l}):Play()
+end)
+end
+if ah.Hover and ag.Window.ConnectedElements then
 aa.AddSignal(h.MouseEnter,function()
 if am then
 
@@ -30585,6 +30638,22 @@ ay.Visible=false
 end
 
 function ah.Highlight(l)
+if not ag.Window.ConnectedElements then
+local m=h:FindFirstChild"HighlightStroke"
+if not m then
+m=ab("UIStroke",{
+Name="HighlightStroke",
+Parent=h,
+ApplyStrokeMode=Enum.ApplyStrokeMode.Border,
+Thickness=2,
+Transparency=1,
+ThemeTag={Color="Primary"},
+})
+end
+m.Transparency=0.15
+ad(m,0.75,{Transparency=1}):Play()
+return
+end
 local m=ab("UIGradient",{
 Color=ColorSequence.new{
 ColorSequenceKeypoint.new(0,Color3.new(1,1,1)),
@@ -30642,7 +30711,7 @@ end)
 end
 
 function ah.UpdateShape(l)
-if ag.Window.NewElements then
+if ag.Window.NewElements and ag.Window.ConnectedElements then
 local m=aa:GetElementPosition(
 l.Elements,
 ah.Index,
@@ -35293,15 +35362,15 @@ Icon=al.Icon,
 Elements={},
 Layout=al.Layout or"Vertical",
 }
-local aq=aa.NewRoundFrame(al.Radius or am.ElementConfig.UICorner,"Squircle",{
+local aq=af("Frame",{
 Size=UDim2.new(1,0,0,0),
 AutomaticSize="Y",
 Parent=al.Parent,
-ImageColor3=typeof(al.BackgroundColor)=="Color3"and al.BackgroundColor or nil,
-ImageTransparency=al.BackgroundTransparency,
+BackgroundColor3=typeof(al.BackgroundColor)=="Color3"and al.BackgroundColor or nil,
+BackgroundTransparency=al.BackgroundTransparency,
 ThemeTag=typeof(al.BackgroundColor)=="Color3"and nil or{
-ImageColor3=al.BackgroundColor or"GroupBackground",
-ImageTransparency=al.BackgroundTransparency and nil or"GroupBackgroundTransparency",
+BackgroundColor3=al.BackgroundColor or"GroupBackground",
+BackgroundTransparency=al.BackgroundTransparency and nil or"GroupBackgroundTransparency",
 },
 },{
 af("UICorner",{CornerRadius=UDim.new(0,al.Radius or am.ElementConfig.UICorner)}),
@@ -35319,6 +35388,7 @@ Padding=UDim.new(0,an),
 })
 local ar=af("UIStroke",{
 Parent=aq,
+ApplyStrokeMode=Enum.ApplyStrokeMode.Border,
 Thickness=al.BorderThickness or 1,
 Transparency=al.Border==false and 1 or(al.BorderTransparency or 0.8),
 Color=typeof(al.BorderColor)=="Color3"and al.BorderColor or nil,
@@ -35396,8 +35466,8 @@ aw.Visible=az~=nil
 as.Visible=al.Header~=false and(ap.Title~=nil or ap.Desc~=nil or ap.Icon~=nil)
 end
 function ap.SetBackground(ay,az,aA)
-if az then aq.ImageColor3=az end
-if aA then aq.ImageTransparency=aA end
+if az then aq.BackgroundColor3=az end
+if aA then aq.BackgroundTransparency=aA end
 end
 return ap.__type,ap
 end
@@ -35477,7 +35547,12 @@ b=b-1
 end
 
 if aB.ElementFrame then
-aB.ElementFrame.Size=UDim2.new(av,b,1,0)
+aB.ElementFrame.Size=UDim2.new(
+av,
+b,
+0,
+aB.ElementFrame.Size.Y.Offset
+)
 end
 end
 end,
@@ -35610,33 +35685,31 @@ RotationSpeed=am.RotationSpeed or 0.01,
 Yaw=am.Yaw or 0,
 Pitch=am.Pitch or 0,
 }
-local ao=af.NewRoundFrame(am.Radius or am.Window.ElementConfig.UICorner,"Squircle",{
-Size=UDim2.new(1,0,0,an.Height),
-Parent=am.Parent,
-ThemeTag={ImageColor3="ViewportBackground",ImageTransparency="ViewportBackgroundTransparency"},
-},{
-ai("UICorner",{CornerRadius=UDim.new(0,am.Radius or am.Window.ElementConfig.UICorner)}),
-})
-local ap=ai("ViewportFrame",{
+local ao=ai("ViewportFrame",{
 Name="Viewport",
-Parent=ao,
-Size=UDim2.new(1,0,1,0),
-BackgroundTransparency=1,
+Parent=am.Parent,
+Size=UDim2.new(1,0,0,an.Height),
+BorderSizePixel=0,
+ThemeTag={
+BackgroundColor3="ViewportBackground",
+BackgroundTransparency="ViewportBackgroundTransparency",
+},
 Active=an.Interactive,
 ClipsDescendants=true,
 Ambient=am.Ambient or Color3.fromRGB(180,180,180),
 LightColor=am.LightColor or Color3.new(1,1,1),
 LightDirection=am.LightDirection or Vector3.new(-1,-1,-1),
-},{ai("UICorner",{CornerRadius=UDim.new(0,am.Radius or am.Window.ElementConfig.UICorner)})})
-local aq=ai("WorldModel",{Parent=ap})
+})
+local ap=ao
+local aq=ai("WorldModel",{Parent=ao})
 local ar=am.Camera and am.Camera:Clone()or ai("Camera",{FieldOfView=am.FieldOfView or 70})
-ar.Parent=ap
-ap.CurrentCamera=ar
+ar.Parent=ao
+ao.CurrentCamera=ar
 an.Camera=ar
 an.WorldModel=aq
-an.Frame=ap
-an.Main=ao
-an.ElementFrame=ao
+an.Frame=ao
+an.Main=ap
+an.ElementFrame=ap
 local as=Vector3.zero
 local at=8
 local au=false
@@ -35666,7 +35739,7 @@ end
 end
 end
 local function Inside(az)
-local aA,aB=ap.AbsolutePosition,ap.AbsoluteSize
+local aA,aB=ao.AbsolutePosition,ao.AbsoluteSize
 return az.X>=aA.X and az.X<=aA.X+aB.X
 and az.Y>=aA.Y and az.Y<=aA.Y+aB.Y
 end
@@ -35712,7 +35785,7 @@ return an
 end
 function an.SetHeight(az,aA)
 an.Height=aA
-ao.Size=UDim2.new(1,0,0,aA)
+ap.Size=UDim2.new(1,0,0,aA)
 return an
 end
 function an.SetCamera(az,aA)
@@ -35722,15 +35795,15 @@ local aB=aA:Clone()
 assert(aB,"Viewport could not clone the camera")
 if ar then ar:Destroy()end
 ar=aB
-ar.Parent=ap
-ap.CurrentCamera=ar
+ar.Parent=ao
+ao.CurrentCamera=ar
 an.Camera=ar
 UpdateCamera()
 return an
 end
 function an.SetInteractive(az,aA)
 an.Interactive=aA==true
-ap.Active=an.Interactive
+ao.Active=an.Interactive
 if not an.Interactive then
 au=false
 SetScrolling(true)
@@ -35749,12 +35822,12 @@ UpdateCamera()
 return an
 end
 function an.SetLighting(az,aA,aB,b)
-if aA then ap.Ambient=aA end
-if aB then ap.LightColor=aB end
-if b then ap.LightDirection=b end
+if aA then ao.Ambient=aA end
+if aB then ao.LightColor=aB end
+if b then ao.LightDirection=b end
 return an
 end
-Connect(ap.InputBegan,function(az)
+Connect(ao.InputBegan,function(az)
 if not an.Interactive then return end
 if az.UserInputType==Enum.UserInputType.MouseButton1 or az.UserInputType==Enum.UserInputType.Touch then
 au=true
@@ -35764,13 +35837,13 @@ SetScrolling(false)
 end
 end)
 Connect(aa.InputChanged,function(az)
-if not an.Interactive or not ap.Parent then return end
+if not an.Interactive or not ao.Parent then return end
 if au and av and
 (az==aw or(aw and aw.UserInputType==Enum.UserInputType.MouseButton1
 and az.UserInputType==Enum.UserInputType.MouseMovement))then
 local aA=az.Position-av
 av=az.Position
-an:SetAngles(an.Yaw-aA.X*an.RotationSpeed,an.Pitch-aA.Y*an.RotationSpeed)
+an:SetAngles(an.Yaw-aA.X*an.RotationSpeed,an.Pitch+aA.Y*an.RotationSpeed)
 end
 end)
 Connect(aa.InputEnded,function(az)
@@ -35781,7 +35854,7 @@ aw=nil
 SetScrolling(true)
 end
 end)
-Connect(ap.InputChanged,function(az)
+Connect(ao.InputChanged,function(az)
 if an.Interactive and az.UserInputType==Enum.UserInputType.MouseWheel then
 an:SetZoom(at-az.Position.Z*an.ZoomSpeed)
 end
@@ -35806,7 +35879,7 @@ for aA,aB in ipairs(ay)do aB:Disconnect()end
 if an.Object and not an.OwnsObject then
 an.Object.Parent=an.OriginalParent
 end
-ao:Destroy()
+ap:Destroy()
 end
 if am.Object then an:SetObject(am.Object)else UpdateCamera()end
 return an.__type,an
@@ -35825,12 +35898,13 @@ Title=al.Title or"Metric",
 Value=al.Value or"—",
 Desc=al.Desc,
 }
-local an=aa.NewRoundFrame(al.Radius or al.Window.ElementConfig.UICorner,"Squircle",{
+local an=af("Frame",{
 Parent=al.Parent,
 Size=UDim2.new(1,0,0,0),
 AutomaticSize="Y",
-ThemeTag={ImageColor3="StatBackground",ImageTransparency="StatBackgroundTransparency"},
+ThemeTag={BackgroundColor3="StatBackground",BackgroundTransparency="StatBackgroundTransparency"},
 },{
+af("UICorner",{CornerRadius=UDim.new(0,al.Radius or al.Window.ElementConfig.UICorner)}),
 af("UIPadding",{
 PaddingTop=UDim.new(0,al.Padding or 14),
 PaddingBottom=UDim.new(0,al.Padding or 14),
@@ -35896,15 +35970,16 @@ Title=al.Title or"Notice",
 Desc=al.Desc or"",
 Icon=al.Icon,
 }
-local an=aa.NewRoundFrame(al.Radius or al.Window.ElementConfig.UICorner,"Squircle",{
+local an=af("Frame",{
 Parent=al.Parent,
 Size=UDim2.new(1,0,0,0),AutomaticSize="Y",
 ThemeTag=typeof(al.Color)=="Color3"and nil or{
-ImageColor3=al.Color or"CalloutBackground",
-ImageTransparency="CalloutBackgroundTransparency",
+BackgroundColor3=al.Color or"CalloutBackground",
+BackgroundTransparency="CalloutBackgroundTransparency",
 },
-ImageColor3=typeof(al.Color)=="Color3"and al.Color or nil,
+BackgroundColor3=typeof(al.Color)=="Color3"and al.Color or nil,
 },{
+af("UICorner",{CornerRadius=UDim.new(0,al.Radius or al.Window.ElementConfig.UICorner)}),
 af("UIPadding",{
 PaddingTop=UDim.new(0,al.Padding or 14),
 PaddingBottom=UDim.new(0,al.Padding or 14),
@@ -37559,6 +37634,7 @@ ScrollBarEnabled=av.ScrollBarEnabled or false,
 SideBarWidth=av.SideBarWidth or 200,
 Acrylic=av.Acrylic or false,
 NewElements=av.NewElements or false,
+ConnectedElements=av.ConnectedElements==true,
 IgnoreAlerts=av.IgnoreAlerts or false,
 HidePanelBackground=av.HidePanelBackground or false,
 AutoScale=av.AutoScale~=false,
@@ -37604,6 +37680,7 @@ IsToggleDragging=false,
 aw.UICorner=aw.Radius
 aw.Topbar.Height=aw.Topbar.Height or 52
 aw.Topbar.ButtonsType=aw.Topbar.ButtonsType or"Default"
+aw.Topbar.TagDirection=aw.Topbar.TagDirection or"LeftToRight"
 
 aw.TopBarButtonIconSize=aw.TopBarButtonIconSize or(aw.Topbar.ButtonsType=="Mac"and 11 or 16)
 
@@ -38337,8 +38414,9 @@ Size=UDim2.new(1,0,1,0),
 ao("UIListLayout",{
 FillDirection="Horizontal",
 VerticalAlignment="Center",
-HorizontalAlignment="Left",
-Padding=UDim.new(0,aw.UIPadding/2),
+HorizontalAlignment=aw.Topbar.TagDirection=="RightToLeft"and"Right"or"Left",
+SortOrder="LayoutOrder",
+Padding=UDim.new(0,aw.Topbar.TagsGap or aw.UIPadding/2),
 }),
 }),
 }),
@@ -39547,8 +39625,26 @@ function aw.Tag(N,O)
 if aw.UIElements.Main.Main.Topbar.Center.Visible==false then
 aw.UIElements.Main.Main.Topbar.Center.Visible=true
 end
+aw.TopbarTagList=aw.TopbarTagList or{}
+O=table.clone(O)
+local P=#aw.TopbarTagList+1
+O.Order=aw.Topbar.TagDirection=="RightToLeft"and-P or P
 O.Window=aw
-return at:New(O,aw.UIElements.Main.Main.Topbar.Center.Holder)
+local Q=at:New(O,aw.UIElements.Main.Main.Topbar.Center.Holder)
+table.insert(aw.TopbarTagList,Q)
+return Q
+end
+function aw.SetTagDirection(N,O)
+assert(O=="LeftToRight"or O=="RightToLeft","Invalid topbar tag direction")
+aw.Topbar.TagDirection=O
+aw.UIElements.Main.Main.Topbar.Center.Holder.UIListLayout.HorizontalAlignment=
+O=="RightToLeft"and"Right"or"Left"
+for P,Q in ipairs(aw.TopbarTagList or{})do
+Q.TagFrame.LayoutOrder=O=="RightToLeft"and-P or P
+end
+end
+for N,O in ipairs(aw.Topbar.Tags or{})do
+aw:Tag(O)
 end
 
 local N=av.WindUI.GenerateGUID()

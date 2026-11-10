@@ -9,15 +9,16 @@ function Element:New(Config)
 		Desc = Config.Desc or "",
 		Icon = Config.Icon,
 	}
-	local Main = Creator.NewRoundFrame(Config.Radius or Config.Window.ElementConfig.UICorner, "Squircle", {
+	local Main = New("Frame", {
 		Parent = Config.Parent,
 		Size = UDim2.new(1, 0, 0, 0), AutomaticSize = "Y",
 		ThemeTag = typeof(Config.Color) == "Color3" and nil or {
-			ImageColor3 = Config.Color or "CalloutBackground",
-			ImageTransparency = "CalloutBackgroundTransparency",
+			BackgroundColor3 = Config.Color or "CalloutBackground",
+			BackgroundTransparency = "CalloutBackgroundTransparency",
 		},
-		ImageColor3 = typeof(Config.Color) == "Color3" and Config.Color or nil,
+		BackgroundColor3 = typeof(Config.Color) == "Color3" and Config.Color or nil,
 	}, {
+		New("UICorner", { CornerRadius = UDim.new(0, Config.Radius or Config.Window.ElementConfig.UICorner) }),
 		New("UIPadding", {
 			PaddingTop = UDim.new(0, Config.Padding or 14),
 			PaddingBottom = UDim.new(0, Config.Padding or 14),

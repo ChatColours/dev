@@ -16,7 +16,16 @@ local Window = WindUI:CreateWindow({
     ElementPadding = 12,
     TabGap = 6,
     ContentPadding = 16,
-    Topbar = { Height = 48, ButtonsType = "Mac" },
+    Topbar = {
+        Height = 48,
+        ButtonsType = "Mac",
+        TagDirection = "RightToLeft", -- or "LeftToRight"
+        TagsGap = 6,
+        Tags = {
+            { Title = "Live", Icon = "activity", Color = "Primary" },
+            { Title = "Beta", Color = Color3.fromRGB(100, 80, 180) },
+        },
+    },
     Branding = {
         Placement = "Sidebar", -- or omit for the top bar
         IconPosition = "Left", -- Left, Right, Top, Bottom
@@ -28,6 +37,8 @@ local Window = WindUI:CreateWindow({
     },
 })
 ```
+
+`Window:Tag({ Title = "New", Color = "Primary" })` adds another topbar tag later. `Window:SetTagDirection("LeftToRight")` changes the direction of all existing topbar tags. Use `TagsPosition = "Topbar"` on an element to place its tags in the window topbar. Set `ConnectedElements = true` on the window only when you want adjacent elements to share square edges; separate rounded cards are the default.
 
 ## Element text, images, and tags
 
@@ -41,7 +52,7 @@ Tab:Paragraph({
     ImagePosition = "Right", -- Left, Right, Top, Bottom
     TitleAlign = "Left",
     DescAlign = "Left",
-    TagsPosition = "BelowTitle", -- AboveTitle, BelowTitle, BelowDescription, Left, Right
+    TagsPosition = "Topbar", -- Topbar, AboveTitle, BelowTitle, BelowDescription, Left, Right
     TagsAlign = "Left",          -- Left, Center, Right
     TagsGap = 6,
     TagsWidth = 100,            -- width when tags are on the left or right
@@ -83,6 +94,16 @@ Server:Callout({
     Desc = "Your executor supports this script.",
     Icon = "sparkles",
 })
+```
+
+To place two complete group cards on the same row, create them inside an `HStack`. Each card takes half the available width and keeps its own natural height:
+
+```luau
+local Row = Tab:HStack()
+local Left = Row:Group({ Title = "Server", Icon = "server", Padding = 10 })
+local Right = Row:Group({ Title = "Friends", Icon = "users", Padding = 10 })
+Left:Stat({ Title = "Players", Value = "8" })
+Right:Stat({ Title = "Online", Value = "2" })
 ```
 
 Groups accept `Header = false`, `TextAlign`, `TitleSize`, `DescSize`, `IconSize`, `IconThemed`, `BackgroundColor`, `BackgroundTransparency`, `BorderColor`, `BorderThickness`, and `BorderTransparency`. The background, border, text, and icon use the current theme by default. `Stat` accepts `ValueSize`, `ValueColor`, `TextAlign`, `Padding`, and `Radius`. `Callout` accepts `Color`, `IconSize`, `TitleSize`, `DescSize`, `TextAlign`, `Padding`, and `Radius`.

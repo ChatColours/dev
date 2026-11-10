@@ -63,6 +63,7 @@ return function(Config)
 		SideBarWidth = Config.SideBarWidth or 200,
 		Acrylic = Config.Acrylic or false,
 		NewElements = Config.NewElements or false,
+		ConnectedElements = Config.ConnectedElements == true,
 		IgnoreAlerts = Config.IgnoreAlerts or false,
 		HidePanelBackground = Config.HidePanelBackground or false,
 		AutoScale = Config.AutoScale ~= false,
@@ -108,6 +109,7 @@ return function(Config)
 	Window.UICorner = Window.Radius
 	Window.Topbar.Height = Window.Topbar.Height or 52
 	Window.Topbar.ButtonsType = Window.Topbar.ButtonsType or "Default"
+	Window.Topbar.TagDirection = Window.Topbar.TagDirection or "LeftToRight"
 
 	Window.TopBarButtonIconSize = Window.TopBarButtonIconSize or (Window.Topbar.ButtonsType == "Mac" and 11 or 16)
 
@@ -841,8 +843,9 @@ return function(Config)
 						New("UIListLayout", {
 							FillDirection = "Horizontal",
 							VerticalAlignment = "Center",
-							HorizontalAlignment = "Left",
-							Padding = UDim.new(0, Window.UIPadding / 2),
+							HorizontalAlignment = Window.Topbar.TagDirection == "RightToLeft" and "Right" or "Left",
+							SortOrder = "LayoutOrder",
+							Padding = UDim.new(0, Window.Topbar.TagsGap or Window.UIPadding / 2),
 						}),
 					}),
 				}),
@@ -2051,8 +2054,26 @@ return function(Config)
 		if Window.UIElements.Main.Main.Topbar.Center.Visible == false then
 			Window.UIElements.Main.Main.Topbar.Center.Visible = true
 		end
+		Window.TopbarTagList = Window.TopbarTagList or {}
+		TagConfig = table.clone(TagConfig)
+		local Index = #Window.TopbarTagList + 1
+		TagConfig.Order = Window.Topbar.TagDirection == "RightToLeft" and -Index or Index
 		TagConfig.Window = Window
-		return Tag:New(TagConfig, Window.UIElements.Main.Main.Topbar.Center.Holder)
+		local CreatedTag = Tag:New(TagConfig, Window.UIElements.Main.Main.Topbar.Center.Holder)
+		table.insert(Window.TopbarTagList, CreatedTag)
+		return CreatedTag
+	end
+	function Window:SetTagDirection(Direction)
+		assert(Direction == "LeftToRight" or Direction == "RightToLeft", "Invalid topbar tag direction")
+		Window.Topbar.TagDirection = Direction
+		Window.UIElements.Main.Main.Topbar.Center.Holder.UIListLayout.HorizontalAlignment =
+			Direction == "RightToLeft" and "Right" or "Left"
+		for Index, ExistingTag in ipairs(Window.TopbarTagList or {}) do
+			ExistingTag.TagFrame.LayoutOrder = Direction == "RightToLeft" and -Index or Index
+		end
+	end
+	for _, TopbarTag in ipairs(Window.Topbar.Tags or {}) do
+		Window:Tag(TopbarTag)
 	end
 
 	local CurResizeInput = Config.WindUI.GenerateGUID()

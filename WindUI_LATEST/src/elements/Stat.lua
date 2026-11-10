@@ -9,12 +9,13 @@ function Element:New(Config)
 		Value = Config.Value or "—",
 		Desc = Config.Desc,
 	}
-	local Main = Creator.NewRoundFrame(Config.Radius or Config.Window.ElementConfig.UICorner, "Squircle", {
+	local Main = New("Frame", {
 		Parent = Config.Parent,
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = "Y",
-		ThemeTag = { ImageColor3 = "StatBackground", ImageTransparency = "StatBackgroundTransparency" },
+		ThemeTag = { BackgroundColor3 = "StatBackground", BackgroundTransparency = "StatBackgroundTransparency" },
 	}, {
+		New("UICorner", { CornerRadius = UDim.new(0, Config.Radius or Config.Window.ElementConfig.UICorner) }),
 		New("UIPadding", {
 			PaddingTop = UDim.new(0, Config.Padding or 14),
 			PaddingBottom = UDim.new(0, Config.Padding or 14),
