@@ -434,6 +434,8 @@ else
     local connection
     connection = game.CoreGui.ChildAdded:Connect(function(child)
         if child.Name == "DevConsoleMaster" then
+            DevWindow = child
+            DevUI = DevWindow:FindFirstChild("DevConsoleUI")
             _G.UpdateConnection = DevUI.ChildAdded:Connect(function(child)
                 if child.Name == "MainView" then
                     MainView = child
