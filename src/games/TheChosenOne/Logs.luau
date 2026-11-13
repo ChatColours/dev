@@ -48,7 +48,7 @@ return function(Window, WindUI)
         end
     })
 
-    local GriefLogs = Left:Group({
+    local GriefLogs = Right:Group({
         Title = "Grief Detection",
         Desc = "This may not be accurate, do not fully rely on this.",
         Icon = "server",
