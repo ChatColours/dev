@@ -28,7 +28,7 @@ return function(Window, WindUI)
         Border = true,
     })
 
-    AbuseLogs:Toggle({
+    Left:Toggle({
         Title = "Abuse Detection Enabled",
         Callback = function(state)
             Enabled.AbuseDetection = state
