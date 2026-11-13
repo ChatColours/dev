@@ -28,7 +28,7 @@ return function(Window, WindUI)
         Border = true,
     })
 
-    Left:Toggle({
+    AbuseLogs:Toggle({
         Title = "Abuse Detection Enabled",
         Callback = function(state)
             Enabled.AbuseDetection = state
@@ -36,8 +36,37 @@ return function(Window, WindUI)
     })
 
     AbuseLogs:Toggle({
-        Title = "All Cmds Only",
-        Desc = "While enabled, only commands that target all players will be flagged.",
+        Title = "All/Others Cmds Only",
+        Callback = function(state)
+            print("Toggle state:", state)
+        end
+    })
+    AbuseLogs:Toggle({
+        Title = "Exlusions Enabled",
+        Callback = function(state)
+            print("Toggle state:", state)
+        end
+    })
+
+    local GriefLogs = Left:Group({
+        Title = "Grief Detection",
+        Desc = "This may not be accurate, do not fully rely on this.",
+        Icon = "server",
+        Layout = "Vertical",
+        Padding = 12,
+        Gap = 8,
+        Border = true,
+    })
+
+    GriefLogs:Toggle({
+        Title = "Grief Detection Enabled",
+        Callback = function(state)
+            Enabled.AbuseDetection = state
+        end
+    })
+
+    GriefLogs:Toggle({
+        Title = "Exlusions Enabled",
         Callback = function(state)
             print("Toggle state:", state)
         end
