@@ -28,14 +28,14 @@ return function(Window, WindUI)
         Border = true,
     })
 
-    Tab:Toggle({
+    AbuseLogs:Toggle({
         Title = "Abuse Detection Enabled",
         Callback = function(state)
             Enabled.AbuseDetection = state
         end
     })
 
-    Tab:Toggle({
+    AbuseLogs:Toggle({
         Title = "All Cmds Only",
         Desc = "While enabled, only commands that target all players will be flagged.",
         Callback = function(state)
