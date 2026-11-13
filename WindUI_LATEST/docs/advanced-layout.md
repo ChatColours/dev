@@ -9,6 +9,7 @@ local Window = WindUI:CreateWindow({
     Title = "Ender Hub",
     Author = "By Qilex",
     Icon = "sparkles",
+    IconClipsDescendants = false, -- true clips artwork to the window icon frame
     Theme = "Dark",
     Position = UDim2.fromScale(0.5, 0.5),
     Padding = 14,
@@ -28,6 +29,7 @@ local Window = WindUI:CreateWindow({
     },
     Branding = {
         Placement = "Sidebar", -- or omit for the top bar
+        IconClipsDescendants = false, -- optional override for sidebar branding
         IconPosition = "Left", -- Left, Right, Top, Bottom
         TextAlign = "Left",    -- Left, Center, Right
         Align = "Left",
@@ -37,6 +39,9 @@ local Window = WindUI:CreateWindow({
     },
 })
 ```
+
+Individual tabs also accept `IconClipsDescendants = true` when a tab icon should be clipped. `Window:SelectTab(tab)` accepts either the tab object or its numeric index; only the active tab receives the selected background.
+
 
 `Window:Tag({ Title = "New", Color = "Primary" })` adds another topbar tag later. `Window:SetTagDirection("LeftToRight")` changes the direction of all existing topbar tags. Use `TagsPosition = "Topbar"` on an element to place its tags in the window topbar. Set `ConnectedElements = true` on the window only when you want adjacent elements to share square edges; separate rounded cards are the default.
 

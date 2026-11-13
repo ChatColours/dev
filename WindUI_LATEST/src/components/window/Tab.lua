@@ -45,6 +45,7 @@ function TabModule.New(Config, UIScale)
 		IconColor = Config.IconColor,
 		IconShape = Config.IconShape,
 		IconThemed = Config.IconThemed,
+		IconClipsDescendants = Config.IconClipsDescendants == true,
 		Locked = Config.Locked,
 		ShowTabTitle = Config.ShowTabTitle,
 		TabTitleAlign = Config.TabTitleAlign or "Left",
@@ -182,6 +183,7 @@ function TabModule.New(Config, UIScale)
 			"TabIcon"
 		)
 		Icon.Size = UDim2.new(0, 16, 0, 16)
+		Icon.ClipsDescendants = Tab.IconClipsDescendants
 		if Tab.IconColor then
 			Icon.ImageLabel.ImageColor3 = Tab.IconColor
 		end
@@ -242,6 +244,7 @@ function TabModule.New(Config, UIScale)
 		Icon2 =
 			Creator.Image(Tab.Icon, Tab.Icon .. ":" .. Tab.Title, 0, Window.Folder, Tab.__type, true, Tab.IconThemed)
 		Icon2.Size = UDim2.new(0, 16, 0, 16)
+		Icon2.ClipsDescendants = Tab.IconClipsDescendants
 		Icon2.ImageLabel.ImageTransparency = not Tab.Locked and 0 or 0.7
 		TextOffset = -30
 
@@ -393,14 +396,14 @@ function TabModule.New(Config, UIScale)
 	end
 
 	Creator.AddSignal(Tab.UIElements.Main.MouseEnter, function()
-		if not Tab.Locked then
+		if not Tab.Locked and not Tab.Selected then
 			Creator.SetThemeTag(Tab.UIElements.Main.Frame, {
 				ImageTransparency = "TabBackgroundHoverTransparency",
 				ImageColor3 = "TabBackgroundHover",
 			}, 0.1)
 		end
 	end)
-	Creator.AddSignal(Tab.UIElements.Main.InputEnded, function()
+	local function ClearHover()
 		if Tab.Desc then
 			IsHovering = false
 			if hoverTimer then
@@ -417,12 +420,12 @@ function TabModule.New(Config, UIScale)
 			end
 		end
 
-		if not Tab.Locked then
-			Creator.SetThemeTag(Tab.UIElements.Main.Frame, {
-				ImageTransparency = "TabBorderTransparency",
-			}, 0.1)
-		end
-	end)
+		Creator.SetThemeTag(Tab.UIElements.Main.Frame, {
+			ImageTransparency = "TabHoverOverlayTransparency",
+		}, 0.1)
+	end
+	Creator.AddSignal(Tab.UIElements.Main.MouseLeave, ClearHover)
+	Creator.AddSignal(Tab.UIElements.Main.InputEnded, ClearHover)
 
 	function Tab:ScrollToTheElement(elemindex)
 		Tab.UIElements.ContainerFrame.ScrollingEnabled = false
@@ -582,13 +585,21 @@ function TabModule:OnChange(func)
 end
 
 function TabModule:SelectTab(TabIndex)
-	if not TabModule.Tabs[TabIndex].Locked then
+	if typeof(TabIndex) == "table" then
+		TabIndex = TabIndex.Index
+	end
+	local TargetTab = TabModule.Tabs[TabIndex]
+	if TargetTab and not TargetTab.Locked then
 		TabModule.SelectedTab = TabIndex
 
 		for _, TabObject in next, TabModule.Tabs do
 			if not TabObject.Locked then
 				Creator.SetThemeTag(TabObject.UIElements.Main, {
+					ImageColor3 = "TabBackground",
 					ImageTransparency = "TabBorderTransparency",
+				}, 0.15)
+				Creator.SetThemeTag(TabObject.UIElements.Main.Frame, {
+					ImageTransparency = "TabHoverOverlayTransparency",
 				}, 0.15)
 				if TabObject.Border then
 					Creator.SetThemeTag(TabObject.UIElements.Main.Outline, {
@@ -625,20 +636,17 @@ function TabModule:SelectTab(TabIndex)
 		end
 		TabModule.Tabs[TabIndex].Selected = true
 
-		task.spawn(function()
-			for _, ContainerObject in next, TabModule.Containers do
-				ContainerObject.AnchorPoint = Vector2.new(0, 0.05)
-				ContainerObject.Visible = false
-			end
-			TabModule.Containers[TabIndex].Visible = true
-			local TweenService = game:GetService("TweenService")
-
-			local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-			local tween = TweenService:Create(TabModule.Containers[TabIndex], tweenInfo, {
-				AnchorPoint = Vector2.new(0, 0),
-			})
-			tween:Play()
-		end)
+		for _, ContainerObject in next, TabModule.Containers do
+			ContainerObject.AnchorPoint = Vector2.new(0, 0.05)
+			ContainerObject.Visible = false
+		end
+		TabModule.Containers[TabIndex].Visible = true
+		local TweenService = game:GetService("TweenService")
+		local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+		local tween = TweenService:Create(TabModule.Containers[TabIndex], tweenInfo, {
+			AnchorPoint = Vector2.new(0, 0),
+		})
+		tween:Play()
 
 		TabModule.OnChangeFunc(TabIndex)
 	end

@@ -32,6 +32,7 @@ return function(Creator)
 		TabBackground = "Hover",
 		TabBackgroundHover = "Hover",
 		TabBackgroundHoverTransparency = 0.97,
+		TabHoverOverlayTransparency = 1,
 		TabBackgroundActive = "Hover",
 		TabBackgroundActiveTransparency = 0.93,
 		TabText = "Text",

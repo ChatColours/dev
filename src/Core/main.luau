@@ -1,7 +1,7 @@
 
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/download/1.6.63/main.lua"))()
+local WindUI = loadstring(game:HttpGet("http://localhost:8642/dist/main.lua"))()
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
 local Tabs = {}
 
@@ -130,11 +130,41 @@ local function init()
         HideSearchBar = true,
         ScrollBarEnabled = false,
         IconSize = 32,
-        Acrylic = true,
+        Acrylic = false,
         NewElements = true,
+        Padding = 14,
+        ElementPadding = 12,
+        ContentPadding = 16,
+        TabGap = 8,
         Topbar = {
-            Height = 60,           -- Height of the topbar
-            ButtonsType = "Default" -- "Default" or "Mac" style
+            Height = 48,
+            ButtonsType = "Mac",
+            TagDirection = "RightToLeft", -- or "LeftToRight"
+            TagsGap = 6,
+            Tags = {
+                {
+                    Title = "Live",
+                    Icon = "activity",
+                    Color = "Primary",
+                    Height = 22,
+                    Border = true,
+                },
+                {
+                    Title = "Beta",
+                    Color = Color3.fromRGB(100, 80, 180),
+                    Height = 22,
+                },
+            },
+        },
+
+        Branding = {
+            Placement = "Sidebar",
+            IconPosition = "Left", -- Left, Right, Top, Bottom
+            TextAlign = "Left",
+            Height = 64,
+            Padding = 14,
+            Gap = 8,
+            IconClipsDescendants = false
         },
         User = {
             Enabled = true,
@@ -147,16 +177,7 @@ local function init()
 
     Window:SetIconSize(40)
 
-    Window:CreateTopbarButton("Discord", getcustomasset("MochaHub/assets/discord.png"),    function()
-        setclipboard("https://discord.gg/mochahub")
-        JoinDiscord()
-        WindUI:Notify({
-            Title = "Mocha Hub",
-            Content = "Copied Discord server invite! Paste this on a browser to join",
-            Duration = 3, -- 3 seconds
-            Icon = "bird",
-        })
-    end,  990)
+
 
     WindUI:Notify({
         Title = "Mocha Hub",
@@ -180,6 +201,38 @@ local function init()
         Color = (SupportedGames[game.PlaceId] and Color3.fromHex("#30ff6a")) or Color3.fromHex("#ff3030"),
         Radius = 13, -- from 0 to 13
     })
+
+    local fpsTag = Window:Tag({
+        Title = "FPS: ",
+        Icon = "",
+        Color = Color3.fromHex("#30ff6a"),
+        Radius = 13, -- from 0 to 13
+    })
+    local fps_tick = 0
+    local frameCount = 0
+    
+    RunService.RenderStepped:Connect(function(dt)
+        fps_tick += dt
+        frameCount += 1
+    
+        if fps_tick < .5 then
+            return
+        end
+    
+        local fps = math.floor(frameCount / fps_tick)
+    
+        fpsTag:SetColor(
+            Color3.fromRGB(255, 0, 0):Lerp(
+                Color3.fromRGB(0, 255, 0),
+                math.clamp(fps / 60, 0, 1)
+            )
+        )
+    
+        fpsTag:SetTitle("FPS: " .. tostring(fps))
+    
+        frameCount = 0
+        fps_tick = 0
+    end)
 
     WindUI:Popup({
         Title = "Join Discord?",
@@ -501,122 +554,4 @@ local function init()
     init(Window, WindUI, "Universal/Settings.luau")
 end
 
--- key window
-local KeyWindow = WindUI:CreateWindow({
-    Title = "Mocha Hub",
-    Icon = FetchAsset("icon.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/icon.png"), -- lucide icon
-    Author = "By ChatColours",
-    Folder = "Mocha",
-    -- ↓ This all is Optional. You can remove it.
-    Size = UDim2.fromOffset(640, 460),
-    MinSize = Vector2.new(640, 350),
-    MaxSize = Vector2.new(850, 560),
-    ToggleKey = Enum.KeyCode.RightShift,
-    Transparent = true,
-    Resizable = true,
-    SideBarWidth = 200,
-    BackgroundImageTransparency = 0.42,
-    HideSearchBar = true,
-    ScrollBarEnabled = false,
-    IconSize = 32,
-    Acrylic = true,
-    NewElements = false,
-    Topbar = {
-        Height = 60,           -- Height of the topbar
-        ButtonsType = "Default" -- "Default" or "Mac" style
-    },
-    User = {
-        Enabled = true,
-        Anonymous = false,
-        Callback = function()
-            print("clicked")
-        end,
-    },
-})
-
-local KeyTab = KeyWindow:Tab({
-    Title = "Key",
-    Icon = "key-round", -- optional
-    Locked = false,
-})
-
-KeyTab:Input({
-    Title = "Enter Key",
-    Desc = "If you have a key, enter it here.",
-    Value = "",
-    InputIcon = "user-key",
-    Type = "Input", -- or "Textarea"
-    Placeholder = "MOCHA-XXXX-XXXX-XXXX",
-    Callback = function(input) 
-        KEY = input
-    end
-})
-
-KeyTab:Button({
-    Title = "Submit Key",
-    Desc = "Authenticate your key",
-    Locked = false,
-    Callback = function()
-        local result = KeyModule.Validate({
-            ["Username"] = game.Players.LocalPlayer.Name,
-            ["Userid"] = game.Players.LocalPlayer.UserId,
-            ["Tick"] = os.time(),
-            ["Hwid"] = gethwid(),
-            ["Key license"] = KEY
-        })
-
-        if result then
-            if not result.Approved then
-                WindUI:Notify({
-                    Title = "Mocha Hub",
-                    Content = "Key rejected: ".. result.Reason,
-                    Duration = 5, -- 3 seconds
-                    Icon = "x",
-                })
-            elseif result.Approved then
-                init()
-                KeyWindow:Destroy()
-            end
-        end
-    end
-})
-print(type(KeyTab))
-
-local Group = KeyTab:Group({})
-
-Group:Button({
-    Title = "Join Discord",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        setclipboard("https://discord.gg/mochahub")
-        JoinDiscord()
-        WindUI:Notify({
-            Title = "Mocha Hub",
-            Content = "Copied Discord server invite! Paste this on a browser to join",
-            Duration = 3, -- 3 seconds
-            Icon = "mail",
-        })
-    end
-})
-
-Group:Button({
-    Title = "Join Support",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        setclipboard("https://discord.gg/4eDHh4G9tw")
-        JoinDiscord("4eDHh4G9tw")
-        WindUI:Notify({
-            Title = "Mocha Hub",
-            Content = "Copied support server invite! Paste this on a browser to join",
-            Duration = 3, -- 3 seconds
-            Icon = "mail",
-        })
-    end
-})
-
-KeyTab:Paragraph({
-    Title = "How to get key",
-    Desc = "To get a key, you must be in the Discord server. Upon joining, verify. Once you have verified, go to the bot commands channel and use /gen-key using Mocha Bot. Keys last for 48 hours, but may be extended by staff."
-})
+init()

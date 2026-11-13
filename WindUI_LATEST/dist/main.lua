@@ -24744,6 +24744,7 @@ WindowSearchBarBackground="Dialog",
 TabBackground="Hover",
 TabBackgroundHover="Hover",
 TabBackgroundHoverTransparency=0.97,
+TabHoverOverlayTransparency=1,
 TabBackgroundActive="Hover",
 TabBackgroundActiveTransparency=0.93,
 TabText="Text",
@@ -36233,6 +36234,7 @@ Icon=ap.Icon,
 IconColor=ap.IconColor,
 IconShape=ap.IconShape,
 IconThemed=ap.IconThemed,
+IconClipsDescendants=ap.IconClipsDescendants==true,
 Locked=ap.Locked,
 ShowTabTitle=ap.ShowTabTitle,
 TabTitleAlign=ap.TabTitleAlign or"Left",
@@ -36370,6 +36372,7 @@ ar.IconThemed,
 "TabIcon"
 )
 au.Size=UDim2.new(0,16,0,16)
+au.ClipsDescendants=ar.IconClipsDescendants
 if ar.IconColor then
 au.ImageLabel.ImageColor3=ar.IconColor
 end
@@ -36430,6 +36433,7 @@ end
 av=
 ak.Image(ar.Icon,ar.Icon..":"..ar.Title,0,Window.Folder,ar.__type,true,ar.IconThemed)
 av.Size=UDim2.new(0,16,0,16)
+av.ClipsDescendants=ar.IconClipsDescendants
 av.ImageLabel.ImageTransparency=not ar.Locked and 0 or 0.7
 at=-30
 
@@ -36581,14 +36585,14 @@ end)
 end
 
 ak.AddSignal(ar.UIElements.Main.MouseEnter,function()
-if not ar.Locked then
+if not ar.Locked and not ar.Selected then
 ak.SetThemeTag(ar.UIElements.Main.Frame,{
 ImageTransparency="TabBackgroundHoverTransparency",
 ImageColor3="TabBackgroundHover",
 },0.1)
 end
 end)
-ak.AddSignal(ar.UIElements.Main.InputEnded,function()
+local function ClearHover()
 if ar.Desc then
 az=false
 if ax then
@@ -36605,12 +36609,12 @@ aw=nil
 end
 end
 
-if not ar.Locked then
 ak.SetThemeTag(ar.UIElements.Main.Frame,{
-ImageTransparency="TabBorderTransparency",
+ImageTransparency="TabHoverOverlayTransparency",
 },0.1)
 end
-end)
+ak.AddSignal(ar.UIElements.Main.MouseLeave,ClearHover)
+ak.AddSignal(ar.UIElements.Main.InputEnded,ClearHover)
 
 function ar.ScrollToTheElement(aA,aB)
 ar.UIElements.ContainerFrame.ScrollingEnabled=false
@@ -36770,28 +36774,36 @@ ao.OnChangeFunc=aq
 end
 
 function ao.SelectTab(ap,aq)
-if not ao.Tabs[aq].Locked then
+if typeof(aq)=="table"then
+aq=aq.Index
+end
+local ar=ao.Tabs[aq]
+if ar and not ar.Locked then
 ao.SelectedTab=aq
 
-for ar,as in next,ao.Tabs do
-if not as.Locked then
-ak.SetThemeTag(as.UIElements.Main,{
+for as,at in next,ao.Tabs do
+if not at.Locked then
+ak.SetThemeTag(at.UIElements.Main,{
+ImageColor3="TabBackground",
 ImageTransparency="TabBorderTransparency",
 },0.15)
-if as.Border then
-ak.SetThemeTag(as.UIElements.Main.Outline,{
+ak.SetThemeTag(at.UIElements.Main.Frame,{
+ImageTransparency="TabHoverOverlayTransparency",
+},0.15)
+if at.Border then
+ak.SetThemeTag(at.UIElements.Main.Outline,{
 ImageTransparency="TabBorderTransparency",
 },0.15)
 end
-ak.SetThemeTag(as.UIElements.Main.Frame.TextLabel,{
+ak.SetThemeTag(at.UIElements.Main.Frame.TextLabel,{
 TextTransparency="TabTextTransparency",
 },0.15)
-if as.UIElements.Icon and not as.IconColor then
-ak.SetThemeTag(as.UIElements.Icon.ImageLabel,{
+if at.UIElements.Icon and not at.IconColor then
+ak.SetThemeTag(at.UIElements.Icon.ImageLabel,{
 ImageTransparency="TabIconTransparency",
 },0.15)
 end
-as.Selected=false
+at.Selected=false
 end
 end
 ak.SetThemeTag(ao.Tabs[aq].UIElements.Main,{
@@ -36813,20 +36825,17 @@ ImageTransparency="TabIconTransparencyActive",
 end
 ao.Tabs[aq].Selected=true
 
-task.spawn(function()
-for ar,as in next,ao.Containers do
-as.AnchorPoint=Vector2.new(0,0.05)
-as.Visible=false
+for as,at in next,ao.Containers do
+at.AnchorPoint=Vector2.new(0,0.05)
+at.Visible=false
 end
 ao.Containers[aq].Visible=true
-local ar=game:GetService"TweenService"
-
-local as=TweenInfo.new(0.15,Enum.EasingStyle.Quart,Enum.EasingDirection.Out)
-local at=ar:Create(ao.Containers[aq],as,{
+local as=game:GetService"TweenService"
+local at=TweenInfo.new(0.15,Enum.EasingStyle.Quart,Enum.EasingDirection.Out)
+local au=as:Create(ao.Containers[aq],at,{
 AnchorPoint=Vector2.new(0,0),
 })
-at:Play()
-end)
+au:Play()
 
 ao.OnChangeFunc(aq)
 end
@@ -37605,6 +37614,7 @@ Icon=av.Icon,
 IconSize=av.IconSize or 22,
 IconThemed=av.IconThemed,
 IconRadius=av.IconRadius or 0,
+IconClipsDescendants=av.IconClipsDescendants==true,
 Branding=av.Branding or{},
 Folder=av.Folder,
 Resizable=av.Resizable~=false,
@@ -38724,9 +38734,12 @@ end
 
 task.spawn(function()
 if aw.Icon then
-local C=ao("Frame",{
+local C=aw.Branding.IconClipsDescendants
+if C==nil then C=aw.IconClipsDescendants end
+local F=ao("Frame",{
 Size=UDim2.new(0,aw.IconSize,0,aw.IconSize),
 BackgroundTransparency=1,
+ClipsDescendants=C,
 Parent=aw.UIElements.Main.Main.Topbar.Left,
 })
 
@@ -38740,14 +38753,15 @@ true,
 aw.IconThemed,
 "WindowTopbarIcon"
 )
-x.Parent=C
-aw.UIElements.BrandIconContainer=C
+x.Parent=F
+x.ClipsDescendants=C
+aw.UIElements.BrandIconContainer=F
 x.Size=UDim2.new(0,aw.IconSize,0,aw.IconSize)
 x.Position=UDim2.new(0.5,0,0.5,0)
 x.AnchorPoint=Vector2.new(0.5,0.5)
 if B then
-C.Parent=B
-C.LayoutOrder=
+F.Parent=B
+F.LayoutOrder=
 (aw.Branding.IconPosition=="Right"or aw.Branding.IconPosition=="Bottom")and 2 or 0
 end
 

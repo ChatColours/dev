@@ -1,32 +1,70 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local WindUI = loadstring(game:HttpGet("http://localhost:8642/dist/main.lua"))()
 local Loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/src/Core/loader.luau"))()
+local Tabs = {}
+
 local FetchAsset = Loader.Require("src/Core/Utilities/files.luau")
-local KeySystem = Loader.Require("src/Core/utilities/key.luau")
+local ServerSearch = Loader.Require("src/Modules/ServerSearch.luau")
+local Version = Loader.Require("src/Core/Utilities/version.luau")
+local Logs = Loader.Require("src/Core/Utilities/logs.luau")
+local ThemesLoader = Loader.Require("src/misc/Themes.luau")
+local KeyModule = Loader.Require("src/Core/Utilities/key.luau")
+local KEY = ""
 
-local License = ""
-local LicenseStatus = "Inactive"
-local LicenseURL = ""
-local SupportURL = ""
+local Flavors = ThemesLoader.Flavors
+local CurrentTheme = "Catppuccin Mocha"
 
-local Window = WindUI:CreateWindow({
-    Title = "SteveHub",
-    Icon = FetchAsset("icon.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/icon.jpg"), -- lucide icon
+local function JoinDiscord(inv)
+    if not inv then inv = "mochahub" end
+    local success, err = pcall(function()
+        request({
+            Url = "http://127.0.0.1:6463/rpc?v=1",
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json",
+                ["Origin"] = "https://discord.com"
+            },
+            Body = HttpService:JSONEncode({
+                cmd = "INVITE_BROWSER",
+                nonce = HttpService:GenerateGUID(false),
+                args = {
+                    code = inv
+                }
+            })
+        })
+    end)
+
+    if not success then
+        Logs:Log(`Failed to open Discord (ignore this if u dont have Discord app): {err}`, "ERROR")
+    end
+end
+
+-- key window
+local KeyWindow = WindUI:CreateWindow({
+    Title = "Mocha Hub",
+    Icon = FetchAsset("icon.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/icon.png"), -- lucide icon
     Author = "By ChatColours",
-    Folder = "MySuperHub",
-    
+    Folder = "Mocha",
     -- ↓ This all is Optional. You can remove it.
-    Size = UDim2.fromOffset(580, 460),
-    MinSize = Vector2.new(560, 350),
+    Size = UDim2.fromOffset(640, 460),
+    MinSize = Vector2.new(640, 350),
     MaxSize = Vector2.new(850, 560),
-    ToggleKey = Enum.KeyCode.LeftShift,
-    Background = FetchAsset("background.png", "https://raw.githubusercontent.com/ChatColours/dev/refs/heads/main/assets/background.png"),
+    ToggleKey = Enum.KeyCode.RightShift,
     Transparent = true,
-    Theme = "Dark",
     Resizable = true,
     SideBarWidth = 200,
     BackgroundImageTransparency = 0.42,
     HideSearchBar = true,
     ScrollBarEnabled = false,
+    IconSize = 32,
+    Acrylic = true,
+    NewElements = false,
+    Topbar = {
+        Height = 60,           -- Height of the topbar
+        ButtonsType = "Default" -- "Default" or "Mac" style
+    },
     User = {
         Enabled = true,
         Anonymous = false,
@@ -36,116 +74,89 @@ local Window = WindUI:CreateWindow({
     },
 })
 
-local function Validate(license : string) : boolean
-    local result = KeySystem.Validate(
-        {
+local KeyTab = KeyWindow:Tab({
+    Title = "Key",
+    Icon = "key-round", -- optional
+    Locked = false,
+})
+
+KeyTab:Input({
+    Title = "Enter Key",
+    Desc = "If you have a key, enter it here.",
+    Value = "",
+    InputIcon = "user-key",
+    Type = "Input", -- or "Textarea"
+    Placeholder = "MOCHA-XXXX-XXXX-XXXX",
+    Callback = function(input) 
+        KEY = input
+    end
+})
+
+KeyTab:Button({
+    Title = "Submit Key",
+    Desc = "Authenticate your key",
+    Locked = false,
+    Callback = function()
+        local result = KeyModule.Validate({
             ["Username"] = game.Players.LocalPlayer.Name,
             ["Userid"] = game.Players.LocalPlayer.UserId,
-            ["Hwid"] = gethwid(),
             ["Tick"] = os.time(),
-            ["Key license"] = license
-        }
-    )
-    
-    return result
-end
+            ["Hwid"] = gethwid(),
+            ["Key license"] = KEY
+        })
 
-WindUI:AddTheme({
-    Name = "Minecraft",
+        if result then
+            if not result.Approved then
+                Logs:Log(`Key was rejected: {result.Reason}`, "INFO")
+                WindUI:Notify({
+                    Title = "Mocha Hub",
+                    Content = "Key rejected: ".. result.Reason,
+                    Duration = 5, -- 3 seconds
+                    Icon = "x",
+                })
+            elseif result.Approved then
+                Logs:Log(`Key Accepted!`, "SUCCESS")
+            end
+        end
+    end
+})
+print(type(KeyTab))
 
-    -- Stone / dirt background
-    Accent = WindUI:Gradient({
-        ["0"] = {
-            Color = Color3.fromHex("#8B6B47"),
-            Transparency = 0
-        },
-        ["100"] = {
-            Color = Color3.fromHex("#59422F"),
-            Transparency = 0
-        }
-    }, {
-        Rotation = 45
-    }),
-
-    Background = Color3.fromHex("#292722"),
-    BackgroundTransparency = 0,
-
-    -- Text
-    Text = Color3.fromHex("#F0E9DC"),
-    Placeholder = Color3.fromHex("#A99F90"),
-    Icon = Color3.fromHex("#B6A38A"),
-    Outline = Color3.fromHex("#50483F"),
-
-    -- Stone buttons
-    Button = WindUI:Gradient({
-        ["0"] = {
-            Color = Color3.fromHex("#48443E"),
-            Transparency = 0
-        },
-        ["100"] = {
-            Color = Color3.fromHex("#302D29"),
-            Transparency = 0
-        }
-    }, {
-        Rotation = 90
-    }),
-
-    Hover = Color3.fromHex("#A88B62"),
-
-    -- Window
-    WindowBackground = WindUI:Gradient({
-        ["0"] = {
-            Color = Color3.fromHex("#302B25"),
-            Transparency = 0
-        },
-        ["100"] = {
-            Color = Color3.fromHex("#1A1917"),
-            Transparency = 0
-        }
-    }, {
-        Rotation = 90
-    }),
-
-    WindowShadow = Color3.fromHex("#0D0B09"),
-
-    -- Topbar
-    WindowTopbarButtonIcon = Color3.fromHex("#C9BAA5"),
-    WindowTopbarTitle = Color3.fromHex("#F5EEE2"),
-    WindowTopbarAuthor = Color3.fromHex("#C4A16D"),
-    WindowTopbarIcon = Color3.fromHex("#D1BA8E"),
-
-    -- Tabs
-    TabBackground = Color3.fromHex("#40382F"),
-    TabTitle = Color3.fromHex("#EDE3D3"),
-    TabIcon = Color3.fromHex("#BBA88E"),
-
-    -- Elements
-    ElementBackground = Color3.fromHex("#332F29"),
-    ElementBackgroundHover = Color3.fromHex("#463D32"),
+local Group = KeyTab:Group({})
+local HStack = Group:HStack()
+HStack:Button({
+    Title = "Join Discord",
+    Desc = "",
+    Locked = false,
+    Callback = function()
+        setclipboard("https://discord.gg/mochahub")
+        JoinDiscord()
+        WindUI:Notify({
+            Title = "Mocha Hub",
+            Content = "Copied Discord server invite! Paste this on a browser to join",
+            Duration = 3, -- 3 seconds
+            Icon = "mail",
+        })
+    end
 })
 
-WindUI:SetTheme("Minecraft")
-
-local ReadMe = Window:Tab({
-    Title = "Read Me",
-    Icon = "bird", -- optional
+HStack:Button({
+    Title = "Join Support",
+    Desc = "",
     Locked = false,
+    Callback = function()
+        setclipboard("https://discord.gg/4eDHh4G9tw")
+        JoinDiscord("4eDHh4G9tw")
+        WindUI:Notify({
+            Title = "Mocha Hub",
+            Content = "Copied support server invite! Paste this on a browser to join",
+            Duration = 3, -- 3 seconds
+            Icon = "mail",
+        })
+    end
 })
 
-local Paragraph = Tab:Paragraph({
-    Title = "Paragraph with Image, Thumbnail, Buttons",
-    Desc = "Test Paragraph",
-    Color = "Red",
-    Image = "",
-    ImageSize = 30,
-    Thumbnail = "",
-    ThumbnailSize = 80,
-    Locked = false,
-    Buttons = {
-        {
-            Icon = "bird",
-            Title = "Button",
-            Callback = function() print("1 Button") end,
-        }
-    }
+KeyTab:Paragraph({
+    Title = "How to get key",
+    Desc = "To get a key, you must be in the Discord server. Upon joining, verify. Once you have verified, go to the bot commands channel and use /gen-key using Mocha Bot. Keys last for 48 hours, but may be extended by staff."
 })

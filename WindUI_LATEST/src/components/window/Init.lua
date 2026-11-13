@@ -34,6 +34,7 @@ return function(Config)
 		IconSize = Config.IconSize or 22,
 		IconThemed = Config.IconThemed,
 		IconRadius = Config.IconRadius or 0,
+		IconClipsDescendants = Config.IconClipsDescendants == true,
 		Branding = Config.Branding or {},
 		Folder = Config.Folder,
 		Resizable = Config.Resizable ~= false,
@@ -1153,9 +1154,12 @@ return function(Config)
 
 	task.spawn(function()
 		if Window.Icon then
+			local ClipIcon = Window.Branding.IconClipsDescendants
+			if ClipIcon == nil then ClipIcon = Window.IconClipsDescendants end
 			local WindowIconContainer = New("Frame", {
 				Size = UDim2.new(0, Window.IconSize, 0, Window.IconSize),
 				BackgroundTransparency = 1,
+				ClipsDescendants = ClipIcon,
 				Parent = Window.UIElements.Main.Main.Topbar.Left,
 			})
 
@@ -1170,6 +1174,7 @@ return function(Config)
 				"WindowTopbarIcon"
 			)
 			WindowIcon.Parent = WindowIconContainer
+			WindowIcon.ClipsDescendants = ClipIcon
 			Window.UIElements.BrandIconContainer = WindowIconContainer
 			WindowIcon.Size = UDim2.new(0, Window.IconSize, 0, Window.IconSize)
 			WindowIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
