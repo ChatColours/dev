@@ -16,7 +16,16 @@ return function(Window, WindUI)
     Locked = false,
     })
 
-    local upTime = Tab:Paragraph({
+    local TopStack = Tab:HStack({})
+
+    local Session = TopStack:Group({
+        Title = "Session",
+        Icon = "trending-up",
+        Gap = 8,
+        Padding = 12
+    })
+    
+    local upTime = Session:Paragraph({
     Title = "Uptime",
     Desc = FormatTime(uptime),
     Color = Color3.fromHex("#3B3027"),
